@@ -1,4 +1,4 @@
-# Contributing to Claude Code Docs
+# Contributing to AI Codex
 
 Thank you for considering a contribution. Whether you're fixing a typo, adding a note, or improving the app, all contributions are welcome.
 
@@ -34,8 +34,8 @@ Thank you for considering a contribution. Whether you're fixing a typo, adding a
 1. **Fork** the repository and clone your fork:
 
    ```bash
-   git clone https://github.com/your-username/claude-code-docs.git
-   cd claude-code-docs
+   git clone https://github.com/your-username/ai-codex.git
+   cd ai-codex
    npm install
    ```
 

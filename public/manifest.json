@@ -1,7 +1,7 @@
 {
-	"name": "Claude Notebook",
-	"short_name": "Notebook",
-	"description": "Personal AI learning knowledge base — browse and search notes about Claude and AI development.",
+	"name": "AI Codex",
+	"short_name": "Codex",
+	"description": "AI Codex — a modern, offline-first PWA for exploring AI & Claude development notes.",
 	"start_url": "./index.html",
 	"scope": "./",
 	"display": "standalone",

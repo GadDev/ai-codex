@@ -9,7 +9,12 @@ import type { FuseResult } from "fuse.js";
 import { NOTES } from "./data.js";
 import { getState } from "./state.js";
 import type { NoteMetadata, NoteSearchEntry } from "./types.js";
-import { getNoteContent, readingTime, scoreRelatedness } from "./utils.js";
+import {
+	categorizeNotes,
+	getNoteContent,
+	readingTime,
+	scoreRelatedness,
+} from "./utils.js";
 
 // ── Sidebar nav ──
 
@@ -104,19 +109,35 @@ export function renderSearchResults(
 // ── Welcome grid ──
 
 /**
- * Populate the welcome screen topic-card grid.
+ * Populate the welcome screen with categorized note lists.
  */
 export function renderWelcomeGrid(onNoteClick: (id: string) => void): void {
 	const grid = document.getElementById("welcome-grid")!;
-	NOTES.forEach((note) => {
-		const card = document.createElement("div");
-		card.className = "topic-card";
-		card.innerHTML = `
-      <span class="topic-card-emoji">${note.emoji}</span>
-      <span class="topic-card-title">${note.title}</span>
+	grid.innerHTML = "";
+
+	const categories = categorizeNotes(NOTES);
+
+	categories.forEach((cat) => {
+		// Category header
+		const categoryHeader = document.createElement("div");
+		categoryHeader.className = "category-header";
+		categoryHeader.innerHTML = `
+      <h2 class="category-title">${cat.name}</h2>
+      <p class="category-description">${cat.description}</p>
     `;
-		card.addEventListener("click", () => onNoteClick(note.id));
-		grid.appendChild(card);
+		grid.appendChild(categoryHeader);
+
+		// List of notes in this category
+		const notesList = document.createElement("div");
+		notesList.className = "category-list";
+		cat.notes.forEach((note) => {
+			const noteItem = document.createElement("div");
+			noteItem.className = "note-item";
+			noteItem.textContent = note.title;
+			noteItem.addEventListener("click", () => onNoteClick(note.id));
+			notesList.appendChild(noteItem);
+		});
+		grid.appendChild(notesList);
 	});
 }
 

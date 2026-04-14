@@ -1,6 +1,6 @@
 <div align="center">
 
-# Claude Code Docs
+# AI Codex
 
 **A modern, offline-first PWA for exploring AI & Claude development notes.**
 
@@ -23,7 +23,7 @@
 ## What's in this repo
 
 ```
-claude-code-docs/
+ai-codex/
 ├── notes/                        ← Source of truth — 37 Markdown course notes
 ├── src/                          ← TypeScript app source
 │   ├── main.ts                   ← Entry point
@@ -73,8 +73,8 @@ claude-code-docs/
 ### Installation
 
 ```bash
-git clone https://github.com/your-username/claude-code-docs.git
-cd claude-code-docs
+git clone https://github.com/your-username/ai-codex.git
+cd ai-codex
 npm install
 ```
 

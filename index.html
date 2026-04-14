@@ -3,14 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Claude Notebook</title>
+  <title>AI Codex</title>
 
   <!-- PWA -->
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#c07840" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Notebook" />
+  <meta name="apple-mobile-web-app-title" content="Codex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
   <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
 
   <!-- Favicon -->
@@ -18,7 +21,7 @@
   <link rel="icon" href="/icons/icon-192.svg" sizes="192x192" />
 
   <!-- CSP fallback for file:// usage (frame-ancestors omitted — server-header only) -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; object-src 'none'; base-uri 'self';" />
 
   <!-- App styles -->
   <link rel="stylesheet" href="style.css" />
@@ -61,7 +64,7 @@
     <!-- Welcome screen -->
     <div class="welcome" id="welcome-screen">
       <div class="welcome-mark">📓</div>
-      <h1>Claude Notebook</h1>
+      <h1>AI Codex</h1>
       <p>A personal learning knowledge base about Claude, the Anthropic ecosystem, and AI development — alongside a working web app that serves and searches those notes.</p>
       <div class="topic-grid" id="welcome-grid"></div>
       <div class="welcome-footer">

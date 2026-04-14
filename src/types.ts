@@ -26,6 +26,14 @@ export interface NotesManifest {
 /** Parsed YAML front matter key/value pairs from a markdown file. */
 export type FrontMatter = Record<string, string>;
 
+// ── Categories ───────────────────────────────────────────────────────────
+
+export interface NoteCategory {
+	readonly name: string;
+	readonly description: string;
+	readonly noteIds: readonly string[];
+}
+
 // ── App state ──────────────────────────────────────────────────────────────
 
 /** Immutable application state snapshot. Use setState() to produce updates. */

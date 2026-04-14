@@ -9,13 +9,7 @@
  */
 
 import { createHash } from "node:crypto";
-import {
-	copyFileSync,
-	mkdirSync,
-	readdirSync,
-	readFileSync,
-	writeFileSync,
-} from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -209,16 +203,8 @@ function main(): void {
 	mkdirSync(PUBLIC_DIR, { recursive: true });
 	writeFileSync(OUT_FILE, JSON.stringify(manifest, null, 2), "utf-8");
 
-	// Copy .md files into public/notes/ so Vite serves them at /notes/*.md
-	const PUBLIC_NOTES_DIR = join(PUBLIC_DIR, "notes");
-	mkdirSync(PUBLIC_NOTES_DIR, { recursive: true });
-	for (const filename of filenames) {
-		copyFileSync(join(NOTES_DIR, filename), join(PUBLIC_NOTES_DIR, filename));
-	}
-
 	console.log(`✓ Manifest written → ${OUT_FILE}`);
 	console.log(`  ${notes.length} notes | version ${manifest.version}`);
-	console.log(`✓ Notes copied → ${PUBLIC_NOTES_DIR}`);
 
 	// Patch CACHE_VERSION in public/sw.js with the manifest content hash.
 	// The short hash (12 hex chars) changes whenever any note changes,

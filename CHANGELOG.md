@@ -1,3 +1,9 @@
+## 1.0.0 (2026-04-14)
+
+### Features
+
+* **app:** remove deprecated claude projects and api cost optimisation notes ([c22bf02](https://github.com/GadDev/ai-codex/commit/c22bf02211b2d75f21ac2674393b372701fffc77))
+
 # Changelog
 
 All notable changes to this project will be documented in this file.

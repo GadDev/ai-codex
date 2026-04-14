@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/GadDev/ai-codex/compare/v1.0.0...v1.0.1) (2026-04-14)
+
+### Bug Fixes
+
+* copy notes to public directory and allow google fonts in csp ([a3d85d0](https://github.com/GadDev/ai-codex/commit/a3d85d08a0d7dbeb3fd7c624141413a3d3bf4340))
+
 ## 1.0.0 (2026-04-14)
 
 ### Features

@@ -9,7 +9,13 @@
  */
 
 import { createHash } from "node:crypto";
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+	cpSync,
+	mkdirSync,
+	readdirSync,
+	readFileSync,
+	writeFileSync,
+} from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -205,6 +211,11 @@ function main(): void {
 
 	console.log(`✓ Manifest written → ${OUT_FILE}`);
 	console.log(`  ${notes.length} notes | version ${manifest.version}`);
+
+	// Copy notes/ directory to public/notes/ so they're deployed with the app
+	const PUBLIC_NOTES_DIR = join(PUBLIC_DIR, "notes");
+	cpSync(NOTES_DIR, PUBLIC_NOTES_DIR, { recursive: true, force: true });
+	console.log(`✓ Notes copied → ${PUBLIC_NOTES_DIR}`);
 
 	// Patch CACHE_VERSION in public/sw.js with the manifest content hash.
 	// The short hash (12 hex chars) changes whenever any note changes,

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Notebook</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#c07840" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Notebook" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="/icons/icon-192.svg" type="image/svg+xml" />
+  <link rel="icon" href="/icons/icon-192.svg" sizes="192x192" />
+
+  <!-- CSP fallback for file:// usage (frame-ancestors omitted — server-header only) -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self';" />
+
+  <!-- App styles -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-mark">📓</div>
+        <span class="logo-text">Claude Notebook</span>
+        <span class="logo-version">v1.0</span>
+      </div>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search notes…" autocomplete="off" />
+        <span class="search-shortcut">⌘K</span>
+      </div>
+    </div>
+
+    <div class="nav-section" id="nav-section-label">Topics</div>
+    <div id="tag-filter" class="tag-filter"></div>
+    <div id="nav-list"></div>
+
+    <div class="sidebar-footer">
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle dark/light mode">
+        <span class="theme-toggle-icon" id="theme-toggle-icon">🌙</span>
+        <span id="theme-toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main content ── -->
+  <main class="content" id="main-content">
+    <button type="button" class="hamburger-toggle" id="hamburger-toggle" aria-label="Toggle sidebar">☰</button>
+
+    <!-- Welcome screen -->
+    <div class="welcome" id="welcome-screen">
+      <div class="welcome-mark">📓</div>
+      <h1>Claude Notebook</h1>
+      <p>A personal learning knowledge base about Claude, the Anthropic ecosystem, and AI development — alongside a working web app that serves and searches those notes.</p>
+      <div class="topic-grid" id="welcome-grid"></div>
+      <div class="welcome-footer">
+        <div class="welcome-shortcuts">
+          <div class="shortcut-row"><span class="kbd">⌘ K</span> Focus search</div>
+          <div class="shortcut-row"><span class="kbd">↑ ↓</span> Navigate topics</div>
+          <div class="shortcut-row"><span class="kbd">Esc</span> Clear search</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Note view -->
+    <div id="note-view">
+      <div class="content-topbar" id="note-topbar"></div>
+      <div class="content-body">
+        <div class="md-content" id="note-content"></div>
+      </div>
+    </div>
+
+  </main>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- App script (ES module entry point) -->
+<script type="module" src="/src/main.ts"></script>
+
+</body>
+</html>

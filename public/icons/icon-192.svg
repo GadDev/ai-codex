@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <!-- Background -->
+  <rect width="192" height="192" rx="36" fill="#1c1917"/>
+  <!-- Notebook body -->
+  <rect x="52" y="38" width="96" height="116" rx="8" fill="#2c2722"/>
+  <!-- Spine -->
+  <rect x="52" y="38" width="16" height="116" rx="4" fill="#c07840"/>
+  <!-- Ruled lines -->
+  <line x1="82" y1="72"  x2="134" y2="72"  stroke="#9b9389" stroke-width="3" stroke-linecap="round"/>
+  <line x1="82" y1="88"  x2="134" y2="88"  stroke="#9b9389" stroke-width="3" stroke-linecap="round"/>
+  <line x1="82" y1="104" x2="134" y2="104" stroke="#9b9389" stroke-width="3" stroke-linecap="round"/>
+  <line x1="82" y1="120" x2="114" y2="120" stroke="#9b9389" stroke-width="3" stroke-linecap="round"/>
+  <!-- Bookmark ribbon -->
+  <polygon points="122,38 134,38 134,62 128,56 122,62" fill="#c07840"/>
+</svg>

@@ -21,3 +21,6 @@ coverage/
 # Logs
 npm-debug.log*
 logs/
+
+# drafts
+drafts/

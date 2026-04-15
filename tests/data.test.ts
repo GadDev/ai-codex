@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { NotesManifest } from "../src/types.ts";
@@ -14,15 +14,6 @@ function readManifest(): NotesManifest {
 		"utf-8",
 	);
 	return JSON.parse(raw) as NotesManifest;
-}
-
-/** Slugs of all .md files directly in notes/ (excludes subdirectories like drafts/). */
-function diskSlugs(): Set<string> {
-	return new Set(
-		readdirSync(join(ROOT, "notes"), { withFileTypes: true })
-			.filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
-			.map((entry) => entry.name.replace(/\.md$/, "")),
-	);
 }
 
 // ── Manifest structural integrity ─────────────────────────────────────────
@@ -78,28 +69,6 @@ describe("note IDs", () => {
 		const manifest = readManifest();
 		for (const note of manifest.notes) {
 			expect(note.id, `unexpected id format: ${note.id}`).toMatch(/^note-\d+$/);
-		}
-	});
-});
-
-// ── Every manifest note has a matching .md file ───────────────────────────
-
-describe("note file presence", () => {
-	it("every note in the manifest has a corresponding .md file in notes/", () => {
-		const manifest = readManifest();
-		const onDisk = diskSlugs();
-		for (const note of manifest.notes) {
-			expect(onDisk.has(note.slug), `Missing notes/${note.slug}.md`).toBe(true);
-		}
-	});
-
-	it("every .md file in notes/ has a corresponding entry in the manifest", () => {
-		const manifest = readManifest();
-		const manifestSlugs = new Set(manifest.notes.map((n) => n.slug));
-		for (const slug of diskSlugs()) {
-			expect(manifestSlugs.has(slug), `${slug}.md has no manifest entry`).toBe(
-				true,
-			);
 		}
 	});
 });

@@ -63,6 +63,11 @@ export function formatNote(
 		"---",
 	].join("\n");
 
+	const sectionParts: string[] = [];
+	for (const section of result.sections) {
+		sectionParts.push("---", "", section.heading, "", section.content, "");
+	}
+
 	const body = [
 		`# ${result.title}`,
 		"",
@@ -72,24 +77,7 @@ export function formatNote(
 		"",
 		result.overview,
 		"",
-		"---",
-		"",
-		"## Key Concepts",
-		"",
-		result.keyConcepts,
-		"",
-		"---",
-		"",
-		"## Practical Examples",
-		"",
-		result.practicalExamples,
-		"",
-		"---",
-		"",
-		"## Why It Matters",
-		"",
-		result.whyItMatters,
-		"",
+		...sectionParts,
 		"---",
 		"",
 		"## My Takeaways",

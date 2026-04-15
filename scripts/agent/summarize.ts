@@ -28,15 +28,18 @@ export interface SummarizeInput {
 	readonly role?: SummarizeRole;
 }
 
+export interface NoteSection {
+	readonly heading: string;
+	readonly content: string;
+}
+
 export interface SummarizeResult {
 	readonly title: string;
 	readonly slug: string;
 	readonly tags: string[];
 	readonly emoji: string;
 	readonly overview: string;
-	readonly keyConcepts: string;
-	readonly practicalExamples: string;
-	readonly whyItMatters: string;
+	readonly sections: readonly NoteSection[];
 	readonly myTakeaways: string;
 	readonly references: string;
 	readonly tokenUsage: {
@@ -53,7 +56,7 @@ export class SummarizeError extends Error {
 }
 
 const MODEL = "claude-sonnet-4-5";
-const MAX_TOKENS = 4096;
+const MAX_TOKENS = 8192;
 const MAX_RETRIES = 2;
 const RETRY_BASE_DELAY_MS = 1_000;
 /** Truncate source text to avoid excessive token usage. */
@@ -101,13 +104,18 @@ const OUTPUT_SCHEMA = `Respond with a single JSON object (no markdown fences) ma
   "slug": "string — lowercase-hyphenated, max 50 chars, alphanumeric and hyphens only",
   "tags": ["array", "of", "lowercase", "strings", "max 6 tags"],
   "emoji": "string — single relevant emoji",
-  "overview": "string — 2-3 sentence plain-English summary a future-you would thank you for",
-  "keyConcepts": "string — Markdown bullet list; each bullet: concept name in bold + one-sentence plain explanation + analogy or example",
-  "practicalExamples": "string — Markdown bullet list of concrete examples, code snippets, or real-world use cases",
-  "whyItMatters": "string — 1-2 sentences: what breaks or is harder without knowing this?",
-  "myTakeaways": "string — Markdown bullet list of actionable things to remember or try",
+  "overview": "string — 3-5 sentence plain-English summary. Cover what it is, why it exists, and the one insight that will stick with you. A future-you who has forgotten the topic entirely should understand the big picture after reading this.",
+  "sections": [
+    {
+      "heading": "string — a descriptive ## heading that fits the topic (e.g. '## The Core Trade-off', '## LangChain — The Swiss Army Knife'). Choose headings that best organise the content — do NOT use generic names like 'Key Concepts' or 'Practical Examples' unless they genuinely fit.",
+      "content": "string — rich Markdown content for this section. Mix prose, code blocks, tables, and bullet lists as appropriate. Aim for depth: explain the why, include concrete examples, surface the gotchas."
+    }
+  ],
+  "myTakeaways": "string — Markdown bullet list of 5-8 actionable, opinionated things to remember or try. Each bullet should be a concrete action or decision rule, not a restatement of facts. Start each bullet with a verb.",
   "references": "string — Markdown list of source URLs or citations (include the source URL at minimum)"
-}`;
+}
+
+For 'sections': Design the section structure to match the topic. A framework comparison note might have one section per framework. A concepts note might separate theory from application. A how-to note might follow a step-by-step structure. Aim for 4-8 sections with rich, detailed content in each.`;
 
 function buildSystemPrompt(role: SummarizeRole = "llm"): string {
 	const lens = ROLE_LENSES[role];
@@ -141,10 +149,17 @@ ${truncatedText}
 </source_content>`;
 }
 
+function stripCodeFences(raw: string): string {
+	// Strip opening ```json or ``` fence (present even when response is truncated)
+	const withoutOpen = raw.trim().replace(/^```(?:json)?\r?\n?/, "");
+	// Strip closing ``` fence if present (may be absent if response was truncated)
+	return withoutOpen.replace(/\r?\n?```\s*$/, "").trim();
+}
+
 function parseApiResponse(raw: string): Omit<SummarizeResult, "tokenUsage"> {
 	let parsed: unknown;
 	try {
-		parsed = JSON.parse(raw);
+		parsed = JSON.parse(stripCodeFences(raw));
 	} catch {
 		throw new SummarizeError(
 			`Claude returned non-JSON response: ${raw.slice(0, 200)}`,
@@ -161,9 +176,6 @@ function parseApiResponse(raw: string): Omit<SummarizeResult, "tokenUsage"> {
 		"slug",
 		"emoji",
 		"overview",
-		"keyConcepts",
-		"practicalExamples",
-		"whyItMatters",
 		"myTakeaways",
 		"references",
 	] as const;
@@ -183,15 +195,27 @@ function parseApiResponse(raw: string): Omit<SummarizeResult, "tokenUsage"> {
 		throw new SummarizeError('Missing or invalid field in response: "tags"');
 	}
 
+	if (
+		!Array.isArray(obj["sections"]) ||
+		obj["sections"].length === 0 ||
+		obj["sections"].some(
+			(s) =>
+				typeof (s as Record<string, unknown>)["heading"] !== "string" ||
+				typeof (s as Record<string, unknown>)["content"] !== "string",
+		)
+	) {
+		throw new SummarizeError(
+			'Missing or invalid field in response: "sections" must be a non-empty array of {heading, content} objects',
+		);
+	}
+
 	return {
 		title: obj["title"] as string,
 		slug: obj["slug"] as string,
 		tags: obj["tags"] as string[],
 		emoji: obj["emoji"] as string,
 		overview: obj["overview"] as string,
-		keyConcepts: obj["keyConcepts"] as string,
-		practicalExamples: obj["practicalExamples"] as string,
-		whyItMatters: obj["whyItMatters"] as string,
+		sections: obj["sections"] as NoteSection[],
 		myTakeaways: obj["myTakeaways"] as string,
 		references: obj["references"] as string,
 	};
@@ -242,6 +266,12 @@ export async function summarize(
 				inputTokens: response.usage.input_tokens,
 				outputTokens: response.usage.output_tokens,
 			};
+
+			if (response.stop_reason === "max_tokens") {
+				throw new SummarizeError(
+					"Claude response was truncated (max_tokens reached). Try a shorter or more focused topic.",
+				);
+			}
 
 			const firstBlock = response.content[0];
 			if (!firstBlock || firstBlock.type !== "text") {

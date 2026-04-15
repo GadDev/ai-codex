@@ -16,12 +16,12 @@ function readManifest(): NotesManifest {
 	return JSON.parse(raw) as NotesManifest;
 }
 
-/** Slugs of all .md files actually on disk in notes/. */
+/** Slugs of all .md files directly in notes/ (excludes subdirectories like drafts/). */
 function diskSlugs(): Set<string> {
 	return new Set(
-		readdirSync(join(ROOT, "notes"))
-			.filter((f) => f.endsWith(".md"))
-			.map((f) => f.replace(/\.md$/, "")),
+		readdirSync(join(ROOT, "notes"), { withFileTypes: true })
+			.filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
+			.map((entry) => entry.name.replace(/\.md$/, "")),
 	);
 }
 

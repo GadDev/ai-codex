@@ -174,8 +174,9 @@ function numFromSlug(slug: string): string {
 // ── Main ───────────────────────────────────────────────────────────────────
 
 function main(): void {
-	const filenames: string[] = readdirSync(NOTES_DIR)
-		.filter((f: string) => f.endsWith(".md"))
+	const filenames: string[] = readdirSync(NOTES_DIR, { withFileTypes: true })
+		.filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
+		.map((entry) => entry.name)
 		.sort(); // lexicographic order matches numeric order due to zero-padded names
 
 	const notes: NoteSearchEntry[] = filenames.map((filename: string) => {

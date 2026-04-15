@@ -10,9 +10,16 @@ const baseResult: SummarizeResult = {
 	tags: ["transformers", "deep learning", "NLP"],
 	emoji: "🧠",
 	overview: "The transformer architecture introduced in 2017.",
-	keyConcepts: "Self-attention, multi-head attention, positional encoding.",
-	practicalExamples: "BERT, GPT, T5 all build on this architecture.",
-	whyItMatters: "Replaced RNNs and became the foundation of modern LLMs.",
+	sections: [
+		{
+			heading: "## Self-Attention — The Core Idea",
+			content: "Self-attention, multi-head attention, positional encoding.",
+		},
+		{
+			heading: "## Why It Replaced RNNs",
+			content: "BERT, GPT, T5 all build on this architecture.",
+		},
+	],
 	myTakeaways: "Attention allows the model to weigh token relevance globally.",
 	references: "- Vaswani et al. (2017). Attention Is All You Need.",
 	tokenUsage: { inputTokens: 100, outputTokens: 200 },
@@ -85,12 +92,11 @@ describe("formatNote", () => {
 		expect(output).toContain("# Attention Is All You Need");
 	});
 
-	it("includes all required section headings", () => {
+	it("includes overview, custom section headings, takeaways, and references", () => {
 		const output = formatNote(baseResult, { noteId: 1 });
 		expect(output).toContain("## Overview");
-		expect(output).toContain("## Key Concepts");
-		expect(output).toContain("## Practical Examples");
-		expect(output).toContain("## Why It Matters");
+		expect(output).toContain("## Self-Attention — The Core Idea");
+		expect(output).toContain("## Why It Replaced RNNs");
 		expect(output).toContain("## My Takeaways");
 		expect(output).toContain("## References");
 	});
@@ -98,9 +104,10 @@ describe("formatNote", () => {
 	it("places each section's content under the correct heading", () => {
 		const output = formatNote(baseResult, { noteId: 1 });
 		expect(output).toContain(baseResult.overview);
-		expect(output).toContain(baseResult.keyConcepts);
-		expect(output).toContain(baseResult.practicalExamples);
-		expect(output).toContain(baseResult.whyItMatters);
+		for (const section of baseResult.sections) {
+			expect(output).toContain(section.heading);
+			expect(output).toContain(section.content);
+		}
 		expect(output).toContain(baseResult.myTakeaways);
 		expect(output).toContain(baseResult.references);
 	});
@@ -133,21 +140,15 @@ The transformer architecture introduced in 2017.
 
 ---
 
-## Key Concepts
+## Self-Attention — The Core Idea
 
 Self-attention, multi-head attention, positional encoding.
 
 ---
 
-## Practical Examples
+## Why It Replaced RNNs
 
 BERT, GPT, T5 all build on this architecture.
-
----
-
-## Why It Matters
-
-Replaced RNNs and became the foundation of modern LLMs.
 
 ---
 

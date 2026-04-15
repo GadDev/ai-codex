@@ -11,6 +11,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import chalk from "chalk";
+import ora from "ora";
 import { FetchError, fetchUrl } from "./fetch.ts";
 import { formatNote } from "./format.ts";
 import { logError, logRun, setDebug } from "./logger.ts";
@@ -63,6 +64,7 @@ function loadEnv(): void {
 interface ParsedArgs {
 	urls: string[];
 	topic: string | null;
+	description: string | null;
 	role: SummarizeRole;
 	debug: boolean;
 }
@@ -79,6 +81,7 @@ interface ParsedArgs {
 function parseArgs(argv: string[]): ParsedArgs {
 	const urls: string[] = [];
 	let topic: string | null = null;
+	let description: string | null = null;
 	let role: SummarizeRole = "llm";
 	let debug = false;
 
@@ -104,6 +107,12 @@ function parseArgs(argv: string[]): ParsedArgs {
 			continue;
 		}
 
+		const descriptionMatch = arg.match(/^--description=(.+)$/);
+		if (descriptionMatch) {
+			description = descriptionMatch[1] ?? null;
+			continue;
+		}
+
 		const roleMatch = arg.match(/^--role=(.+)$/);
 		if (roleMatch) {
 			const raw = roleMatch[1]?.trim() as SummarizeRole;
@@ -119,7 +128,7 @@ function parseArgs(argv: string[]): ParsedArgs {
 		}
 	}
 
-	return { urls, topic, role, debug };
+	return { urls, topic, description, role, debug };
 }
 
 // ── Validation ─────────────────────────────────────────────────────────────
@@ -196,59 +205,65 @@ async function ingestUrl(
 ): Promise<void> {
 	console.log(chalk.bold(`\n[${index + 1}] Processing: ${chalk.cyan(url)}`));
 
-	console.log(chalk.dim("  → Fetching..."));
+	const spinner = ora({ color: "cyan" });
+
+	spinner.start("Fetching...");
 	const fetchResult = await fetchUrl(url);
-	console.log(
-		chalk.green(`  ✓ Fetched`) +
+	spinner.succeed(
+		chalk.green("Fetched") +
 			chalk.dim(
 				` (${fetchResult.html.length} chars, HTTP ${fetchResult.statusCode})`,
 			),
 	);
 
-	console.log(chalk.dim("  → Sanitizing..."));
+	spinner.start("Sanitizing...");
 	const sanitized = sanitizeHtml(fetchResult.html, url);
-	console.log(
-		chalk.green(`  ✓ Sanitized`) +
+	spinner.succeed(
+		chalk.green("Sanitized") +
 			chalk.dim(
 				` — title: "${sanitized.title}" (${sanitized.text.length} chars)`,
 			),
 	);
 
-	console.log(chalk.dim("  → Summarizing via Claude API..."));
+	spinner.start(`Summarizing via Claude API (role: ${role})...`);
 	const summary = await summarize({
 		text: sanitized.text,
 		title: sanitized.title,
 		sourceUrl: url,
 		role,
 	});
-	console.log(
-		chalk.green(`  ✓ Summarized`) +
+	spinner.succeed(
+		chalk.green("Summarized") +
 			chalk.dim(
-				` — "${summary.title}" [${summary.slug}] (in: ${summary.tokenUsage.inputTokens}, out: ${summary.tokenUsage.outputTokens} tokens)`,
+				` — "${summary.title}" [${summary.slug}]` +
+					` (in: ${summary.tokenUsage.inputTokens}, out: ${summary.tokenUsage.outputTokens} tokens)`,
 			),
 	);
 
-	console.log(chalk.dim("  → Formatting..."));
+	spinner.start("Formatting...");
 	const markdown = formatNote(summary, { noteId });
-	console.log(
-		chalk.green(`  ✓ Formatted`) + chalk.dim(` (${markdown.length} chars)`),
+	spinner.succeed(
+		chalk.green("Formatted") + chalk.dim(` (${markdown.length} chars)`),
 	);
 
-	console.log(chalk.dim("  → Validating..."));
+	spinner.start("Validating...");
 	const validation = await validateNote(markdown);
 	if (!validation.valid) {
-		for (const err of validation.errors)
+		spinner.fail(chalk.red("Validation failed"));
+		for (const err of validation.errors) {
 			console.error(chalk.red(`     ✗ ${err}`));
+			logError(`Validation error [${url}]: ${err}`);
+		}
 		throw new Error(
 			`Note validation failed with ${validation.errors.length} error(s)`,
 		);
 	}
-	console.log(chalk.green("  ✓ Validated"));
+	spinner.succeed(chalk.green("Validated"));
 
-	console.log(chalk.dim("  → Saving..."));
+	spinner.start("Saving draft...");
 	const saveResult = await saveDraft(summary.slug, markdown);
-	console.log(
-		chalk.green("  ✓ Saved") + chalk.dim(` → ${saveResult.filePath}`),
+	spinner.succeed(
+		chalk.green("Saved") + chalk.dim(` → ${saveResult.filePath}`),
 	);
 	logRun(`Saved draft: ${saveResult.filePath} (source: ${url})`);
 }
@@ -258,6 +273,7 @@ async function ingestUrl(
  */
 async function ingestTopic(
 	topic: string,
+	description: string | null,
 	index: number,
 	noteId: number,
 	role: SummarizeRole,
@@ -268,43 +284,51 @@ async function ingestTopic(
 		),
 	);
 
+	const spinner = ora({ color: "cyan" });
+
 	const input: SummarizeInput = {
-		text: `Write a comprehensive technical note about: ${topic}`,
+		text: description
+			? `Additional context provided by the user:\n${description}`
+			: `Write a comprehensive technical note about: ${topic}`,
 		title: topic,
 		sourceUrl: "",
 		role,
 	};
 
-	console.log(chalk.dim("  → Summarizing via Claude API..."));
+	spinner.start(`Summarizing via Claude API (role: ${role})...`);
 	const summary = await summarize(input);
-	console.log(
-		chalk.green(`  ✓ Summarized`) +
+	spinner.succeed(
+		chalk.green("Summarized") +
 			chalk.dim(
-				` — "${summary.title}" [${summary.slug}] (in: ${summary.tokenUsage.inputTokens}, out: ${summary.tokenUsage.outputTokens} tokens)`,
+				` — "${summary.title}" [${summary.slug}]` +
+					` (in: ${summary.tokenUsage.inputTokens}, out: ${summary.tokenUsage.outputTokens} tokens)`,
 			),
 	);
 
-	console.log(chalk.dim("  → Formatting..."));
+	spinner.start("Formatting...");
 	const markdown = formatNote(summary, { noteId });
-	console.log(
-		chalk.green(`  ✓ Formatted`) + chalk.dim(` (${markdown.length} chars)`),
+	spinner.succeed(
+		chalk.green("Formatted") + chalk.dim(` (${markdown.length} chars)`),
 	);
 
-	console.log(chalk.dim("  → Validating..."));
+	spinner.start("Validating...");
 	const validation = await validateNote(markdown);
 	if (!validation.valid) {
-		for (const err of validation.errors)
+		spinner.fail(chalk.red("Validation failed"));
+		for (const err of validation.errors) {
 			console.error(chalk.red(`     ✗ ${err}`));
+			logError(`Validation error [topic: ${topic}]: ${err}`);
+		}
 		throw new Error(
 			`Note validation failed with ${validation.errors.length} error(s)`,
 		);
 	}
-	console.log(chalk.green("  ✓ Validated"));
+	spinner.succeed(chalk.green("Validated"));
 
-	console.log(chalk.dim("  → Saving..."));
+	spinner.start("Saving draft...");
 	const saveResult = await saveDraft(summary.slug, markdown);
-	console.log(
-		chalk.green("  ✓ Saved") + chalk.dim(` → ${saveResult.filePath}`),
+	spinner.succeed(
+		chalk.green("Saved") + chalk.dim(` → ${saveResult.filePath}`),
 	);
 	logRun(`Saved draft: ${saveResult.filePath} (topic: ${topic})`);
 }
@@ -321,7 +345,7 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	const { urls, topic, role, debug } = parseArgs(process.argv);
+	const { urls, topic, description, role, debug } = parseArgs(process.argv);
 	setDebug(debug);
 	console.log(
 		chalk.cyan(`Role: ${role}`) + (debug ? chalk.dim(" [debug mode]") : ""),
@@ -383,6 +407,7 @@ async function main(): Promise<void> {
 				const msg = `Summarize failed for ${urls[i]}: ${err.message}`;
 				console.error(chalk.red(`  ✗ ${msg}`));
 				logError(msg);
+				process.exit(1);
 			} else if (err instanceof SaveError) {
 				const msg = `Save failed for ${urls[i]}: ${(err as Error).message}`;
 				console.error(chalk.red(`  ✗ ${msg}`));
@@ -400,6 +425,7 @@ async function main(): Promise<void> {
 		try {
 			await ingestTopic(
 				topic as string,
+				description,
 				itemIndex,
 				startingNoteId + itemIndex,
 				role,
@@ -409,6 +435,7 @@ async function main(): Promise<void> {
 				const msg = `Summarize failed for topic "${topic}": ${err.message}`;
 				console.error(chalk.red(`  ✗ ${msg}`));
 				logError(msg);
+				process.exit(1);
 			} else if (err instanceof SaveError) {
 				const msg = `Save failed for topic "${topic}": ${(err as Error).message}`;
 				console.error(chalk.red(`  ✗ ${msg}`));

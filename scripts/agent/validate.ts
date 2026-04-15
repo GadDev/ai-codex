@@ -17,16 +17,6 @@ const MIN_CONTENT_LENGTH = 200;
 /** Required frontmatter keys. */
 const REQUIRED_FM_KEYS = ["id", "slug", "title", "tags", "emoji"] as const;
 
-/** Required section headings in the note body. */
-const REQUIRED_SECTIONS = [
-	"## Overview",
-	"## Key Concepts",
-	"## Practical Examples",
-	"## Why It Matters",
-	"## My Takeaways",
-	"## References",
-] as const;
-
 /** Patterns that indicate unsafe or malformed content. */
 const UNSAFE_PATTERNS: RegExp[] = [
 	/<script[\s>]/i,
@@ -115,15 +105,6 @@ function checkSlugFormat(slug: string, errors: string[]): void {
 	}
 }
 
-function checkSections(markdown: string, errors: string[]): void {
-	const body = bodyContent(markdown);
-	for (const heading of REQUIRED_SECTIONS) {
-		if (!body.includes(heading)) {
-			errors.push(`Missing required section: "${heading}"`);
-		}
-	}
-}
-
 function checkContentLength(markdown: string, errors: string[]): void {
 	const body = bodyContent(markdown);
 	// Strip headings and horizontal rules to measure actual content
@@ -172,7 +153,6 @@ export async function validateNote(
 		checkSlugUniqueness(fm["slug"], errors);
 	}
 
-	checkSections(markdown, errors);
 	checkContentLength(markdown, errors);
 	checkUnsafePatterns(markdown, errors);
 

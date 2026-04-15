@@ -4,6 +4,7 @@
    ═══════════════════════════════════════════ */
 
 import "highlight.js/styles/github-dark.min.css";
+import { inject } from "@vercel/analytics";
 
 import { initData, NOTES } from "./data.js";
 import { showNote } from "./navigation.js";
@@ -36,6 +37,9 @@ async function init() {
 			.querySelector<HTMLElement>(".sidebar")
 			?.classList.add("mobile-hidden");
 	}
+
+	// Initialize Vercel Web Analytics
+	inject();
 }
 
 document.addEventListener("DOMContentLoaded", () => {

@@ -51,6 +51,7 @@
 	},
 	"dependencies": {
 		"@anthropic-ai/sdk": "^0.89.0",
+		"@vercel/analytics": "^2.0.1",
 		"chalk": "^5.6.2",
 		"dompurify": "^3.4.0",
 		"highlight.js": "^11.11.1",

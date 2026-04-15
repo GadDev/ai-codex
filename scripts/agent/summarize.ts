@@ -55,7 +55,7 @@ export class SummarizeError extends Error {
 	}
 }
 
-const MODEL = "claude-sonnet-4-5";
+const MODEL = "claude-sonnet-4-6";
 const MAX_TOKENS = 8192;
 const MAX_RETRIES = 2;
 const RETRY_BASE_DELAY_MS = 1_000;
@@ -115,7 +115,7 @@ const OUTPUT_SCHEMA = `Respond with a single JSON object (no markdown fences) ma
   "references": "string — Markdown list of source URLs or citations (include the source URL at minimum)"
 }
 
-For 'sections': Design the section structure to match the topic. A framework comparison note might have one section per framework. A concepts note might separate theory from application. A how-to note might follow a step-by-step structure. Aim for 4-8 sections with rich, detailed content in each.`;
+For 'sections': Design the section structure to match the topic. Aim for 3-5 focused sections. Be concise — prefer one clear example over three mediocre ones, and a tight explanation over an exhaustive one.`;
 
 function buildSystemPrompt(role: SummarizeRole = "llm"): string {
 	const lens = ROLE_LENSES[role];

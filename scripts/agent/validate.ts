@@ -22,7 +22,7 @@ const UNSAFE_PATTERNS: RegExp[] = [
 	/<script[\s>]/i,
 	/<iframe[\s>]/i,
 	/javascript\s*:/i,
-	/on\w+\s*=/i, // inline event handlers
+	/<[^>]+\son\w+\s*=/i, // inline event handlers inside HTML tags only
 	/\.\.\//, // path traversal sequences
 ];
 

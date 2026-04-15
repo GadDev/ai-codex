@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/GadDev/ai-codex/compare/v1.1.0...v1.2.0) (2026-04-15)
+
+### Features
+
+* update package version to 1.1.0 and add ora dependency ([77a231b](https://github.com/GadDev/ai-codex/commit/77a231b5d725c85af1ede344627bb5f26cbdf6d7))
+
 ## [1.1.0](https://github.com/GadDev/ai-codex/compare/v1.0.1...v1.1.0) (2026-04-15)
 
 ### Features

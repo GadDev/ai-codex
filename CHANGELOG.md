@@ -1,3 +1,9 @@
+## [1.3.0](https://github.com/GadDev/ai-codex/compare/v1.2.0...v1.3.0) (2026-04-15)
+
+### Features
+
+* update model version to 4-6 and refine section structure guidelines in summarize function ([115dd96](https://github.com/GadDev/ai-codex/commit/115dd96ac23cc7a8aff0769c8690e6f00c2c3993))
+
 ## [1.2.0](https://github.com/GadDev/ai-codex/compare/v1.1.0...v1.2.0) (2026-04-15)
 
 ### Features

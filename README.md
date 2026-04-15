@@ -10,7 +10,7 @@
 [![Biome](https://img.shields.io/badge/Biome-2.x-60a5fa?logo=biome&logoColor=white)](https://biomejs.dev/)
 [![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)](LICENSE)
 
-[Getting Started](#getting-started) · [Architecture](#architecture) · [PWA & Offline](#pwa--offline) · [Security](#security) · [Contributing](CONTRIBUTORS.md) · [Changelog](CHANGELOG.md)
+[Getting Started](#getting-started) · [Agent Ingestion](#agent-ingestion) · [Architecture](#architecture) · [PWA & Offline](#pwa--offline) · [Security](#security) · [Contributing](CONTRIBUTORS.md) · [Changelog](CHANGELOG.md)
 
 </div>
 
@@ -133,17 +133,103 @@ All notes are cached after first access. Subsequent loads work fully offline.
 
 ## npm Scripts
 
-| Script               | Description                                               |
-| -------------------- | --------------------------------------------------------- |
-| `npm run dev`        | Start Vite dev server with HMR (generates manifest first) |
-| `npm run build`      | Generate manifest → type-check → Vite production build    |
-| `npm run preview`    | Preview the production build locally                      |
-| `npm test`           | Run the full Vitest suite (104 tests)                     |
-| `npm run test:watch` | Run tests in watch mode                                   |
-| `npm run typecheck`  | Type-check with `tsc --noEmit`                            |
-| `npm run lint`       | Biome — check linting and formatting                      |
-| `npm run lint:fix`   | Biome — auto-fix lint and formatting                      |
-| `npm run format`     | Biome — format all files                                  |
+| Script               | Description                                                           |
+| -------------------- | --------------------------------------------------------------------- |
+| `npm run dev`        | Start Vite dev server with HMR (generates manifest first)             |
+| `npm run build`      | Generate manifest → type-check → Vite production build                |
+| `npm run preview`    | Preview the production build locally                                  |
+| `npm test`           | Run the full Vitest suite (104 tests)                                 |
+| `npm run test:watch` | Run tests in watch mode                                               |
+| `npm run typecheck`  | Type-check with `tsc --noEmit`                                        |
+| `npm run lint`       | Biome — check linting and formatting                                  |
+| `npm run lint:fix`   | Biome — auto-fix lint and formatting                                  |
+| `npm run format`     | Biome — format all files                                              |
+| `npm run ingest`     | Run the agent ingestion CLI (see [Agent Ingestion](#agent-ingestion)) |
+
+---
+
+## Agent Ingestion
+
+A secure, agent-based CLI pipeline that fetches a webpage or generates content from a topic, summarises it with Claude, and writes a validated Markdown draft to `notes/drafts/` for human review.
+
+### How It Works
+
+```
+--url / --topic
+      ↓
+  fetch.ts       ← HTTPS-only, 10s timeout, 2 retries
+      ↓
+  sanitize.ts    ← strips scripts/iframes, extracts readable text
+      ↓
+  summarize.ts   ← Claude API call with prompt-injection safeguards
+      ↓
+  format.ts      ← renders YAML frontmatter + structured Markdown note
+      ↓
+  validate.ts    ← checks frontmatter, slug uniqueness, content length, unsafe patterns
+      ↓
+  save.ts        ← writes notes/drafts/{slug}.md — never overwrites
+      ↓
+  logger.ts      ← appends to logs/ingest.log and logs/error.log
+```
+
+### Usage
+
+```bash
+# From a URL
+npm run ingest -- --url="https://example.com/article"
+
+# Multiple URLs (comma-separated or repeated flag)
+npm run ingest -- --url="https://a.com,https://b.com"
+npm run ingest -- --url="https://a.com" --url="https://b.com"
+
+# From a topic (no URL fetch — LLM generates from the topic alone)
+npm run ingest -- --topic="Model Context Protocol"
+
+# With a specific analysis lens
+npm run ingest -- --url="https://example.com" --role=security
+
+# Enable debug output
+npm run ingest -- --url="https://example.com" --debug
+```
+
+### CLI Flags
+
+| Flag             | Description                                                           |
+| ---------------- | --------------------------------------------------------------------- |
+| `--url=<url>`    | URL(s) to ingest (max 3 per run; `https:` only)                       |
+| `--topic=<text>` | Generate a note directly from a topic description                     |
+| `--role=<role>`  | Analysis lens: `llm` (default), `security`, `engineering`, `research` |
+| `--debug`        | Echo log entries to stdout/stderr                                     |
+
+### Setup
+
+1. Create a `.env` file in the project root (already gitignored):
+
+```bash
+CLAUDE_API_KEY=sk-ant-...
+```
+
+2. Run the CLI — drafts appear in `notes/drafts/`.
+3. Review the draft, move it to `notes/` with the correct numeric prefix, then run `npm run build`.
+
+### Security Model
+
+- Only `https:` URLs are accepted (no `http:`, `file:`, `data:`, `javascript:`)
+- Maximum 3 URLs per run
+- Slugs with path traversal sequences (`..`, `/`, `\`, null bytes) are rejected
+- Output path is resolved and asserted to stay inside `notes/drafts/`
+- Existing files are never overwritten
+- All LLM prompts explicitly instruct the model to treat input content as untrusted data
+- HTML is sanitised (scripts, iframes, inline event handlers stripped) before the LLM sees it
+
+### Logs
+
+All runs are logged to the `logs/` directory (gitignored):
+
+| File              | Contents                                        |
+| ----------------- | ----------------------------------------------- |
+| `logs/ingest.log` | Successful saves and run events                 |
+| `logs/error.log`  | Fetch, summarise, save, and validation failures |
 
 ---
 
@@ -320,5 +406,5 @@ Distributed under the [ISC License](LICENSE).
 ---
 
 <div align="center">
-  <sub>Built by Al · April 2026</sub>
+  <sub>Built by GadDev · April 2026</sub>
 </div>

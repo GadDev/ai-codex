@@ -124,6 +124,75 @@ npm run ingest -- --url="https://example.com"   # agent ingestion CLI
 
 ---
 
+## Commit Message Convention
+
+All commits must follow [Conventional Commits](https://www.conventionalcommits.org/) and pass `commitlint`. Rules enforced by `commitlint.config.js`:
+
+### Format
+
+```
+<type>(<scope>): <subject>
+
+[optional body]
+
+[optional footer]
+```
+
+### Allowed Types
+
+| Type       | When to use                            |
+| ---------- | -------------------------------------- |
+| `feat`     | New feature                            |
+| `fix`      | Bug fix                                |
+| `docs`     | Documentation only                     |
+| `style`    | Formatting, no logic change            |
+| `refactor` | Code change with no feature or fix     |
+| `test`     | Adding or updating tests               |
+| `chore`    | Tooling, config, or dependency changes |
+| `perf`     | Performance improvement                |
+| `ci`       | CI/CD changes                          |
+| `revert`   | Reverts a previous commit              |
+| `note`     | Curriculum note added or updated       |
+
+### Allowed Scopes (optional)
+
+`app` · `tts` · `search` · `sw` · `manifest` · `notes` · `deps` · `ci` · `config` · `docs` · `biome` · `types`
+
+### Subject Rules
+
+- Must start with a **lowercase letter**
+- Must **not** end with a period
+- Maximum header length: **100 characters**
+- Use imperative mood: `add`, `fix`, `update` — not `added`, `fixes`, `updated`
+
+### Header
+
+- Must not be longer than 100 characters
+- Must be lower-cased and imperative
+
+### Subject
+
+- Must be lower-cased and imperative
+
+### Body & Footer
+
+- Must be preceded by a **blank line**
+- Each line must not exceed **100 characters**
+
+### Examples
+
+```
+feat(search): add fuzzy matching for tag filters
+fix(sw): correct cache version key after manifest rebuild
+test(utils): add edge cases for readingTime with front matter
+chore(deps): upgrade vite to 6.2.0
+note(notes): add claude extended thinking note
+refactor(app): extract note renderer into dedicated module
+docs: update README with agent ingestion section
+```
+
+---
+
 ## File Structure Conventions
 
 ```

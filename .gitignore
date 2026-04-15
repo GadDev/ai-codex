@@ -20,3 +20,4 @@ coverage/
 
 # Logs
 npm-debug.log*
+logs/

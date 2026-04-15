@@ -1,6 +1,5 @@
 /**
  * format.ts — Convert a SummarizeResult into a Markdown note string.
- * Phase 1 stub: signature and types defined, implementation in Phase 1 §2.5.
  */
 
 import type { SummarizeResult } from "./summarize.ts";
@@ -10,28 +9,99 @@ export interface FormatOptions {
 	noteId: number;
 }
 
+/** Pad a number to two digits: 7 → "07", 38 → "38". */
+function padId(n: number): string {
+	return String(n).padStart(2, "0");
+}
+
+/**
+ * Render a tags array as an inline YAML sequence: ["a","b"] → [a, b]
+ * No quoting unless the tag contains special YAML characters.
+ */
+function renderTagsYaml(tags: string[]): string {
+	return `[${tags.join(", ")}]`;
+}
+
 /**
  * Render a structured summary as a Markdown note with YAML frontmatter.
  *
  * Output shape:
  * ---
- * id: note-XX
+ * id: note-38
  * slug: example-topic
  * title: Example Topic
- * tags: ["tag1", "tag2"]
+ * tags: [tag1, tag2]
  * emoji: 🧠
  * ---
+ *
+ * # Example Topic
  *
  * ## Overview
  * ## Key Concepts
  * ## Practical Examples
  * ## Why It Matters
  * ## My Takeaways
+ * ## References
  */
 export function formatNote(
-	_result: SummarizeResult,
-	_options: FormatOptions,
+	result: SummarizeResult,
+	options: FormatOptions,
 ): string {
-	// TODO: implement in Phase 1 §2.5
-	throw new Error("formatNote not yet implemented");
+	const id = `note-${padId(options.noteId)}`;
+
+	// Sanitise title for use in the frontmatter: strip characters that break YAML
+	const safeTitle = result.title.replace(/[:"{}[\]|>&*!,%@`]/g, "").trim();
+	const safeTags = result.tags.map((t) => t.toLowerCase().replace(/\s+/g, "-"));
+
+	const frontmatter = [
+		"---",
+		`id: ${id}`,
+		`slug: ${result.slug}`,
+		`title: ${safeTitle}`,
+		`tags: ${renderTagsYaml(safeTags)}`,
+		`emoji: ${result.emoji}`,
+		"---",
+	].join("\n");
+
+	const body = [
+		`# ${result.title}`,
+		"",
+		"---",
+		"",
+		"## Overview",
+		"",
+		result.overview,
+		"",
+		"---",
+		"",
+		"## Key Concepts",
+		"",
+		result.keyConcepts,
+		"",
+		"---",
+		"",
+		"## Practical Examples",
+		"",
+		result.practicalExamples,
+		"",
+		"---",
+		"",
+		"## Why It Matters",
+		"",
+		result.whyItMatters,
+		"",
+		"---",
+		"",
+		"## My Takeaways",
+		"",
+		result.myTakeaways,
+		"",
+		"---",
+		"",
+		"## References",
+		"",
+		result.references,
+	].join("\n");
+
+	return `${frontmatter}\n\n${body}\n`;
 }

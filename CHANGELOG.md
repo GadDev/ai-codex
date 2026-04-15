@@ -1,3 +1,11 @@
+## [1.1.0](https://github.com/GadDev/ai-codex/compare/v1.0.1...v1.1.0) (2026-04-15)
+
+### Features
+
+* add github copilot instructions for project standards and best practices ([4d449b1](https://github.com/GadDev/ai-codex/commit/4d449b1c9cffa3026146b198be3d68d052b57008))
+* add initial implementation of summarize function and related interfaces ([9b43cb3](https://github.com/GadDev/ai-codex/commit/9b43cb3afbe4e95080f1b53ea5d26e141d424ad0))
+* add initial implementation stubs for ingestion pipeline and related modules ([90f82b1](https://github.com/GadDev/ai-codex/commit/90f82b15deeffdebf38ecd5042d4e46fe222feff))
+
 ## [1.0.1](https://github.com/GadDev/ai-codex/compare/v1.0.0...v1.0.1) (2026-04-14)
 
 ### Bug Fixes

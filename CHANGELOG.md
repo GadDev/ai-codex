@@ -1,3 +1,9 @@
+## [1.5.0](https://github.com/GadDev/ai-codex/compare/v1.4.0...v1.5.0) (2026-04-16)
+
+### Features
+
+* enhance summarize function with multi-source url support and note length options ([7309893](https://github.com/GadDev/ai-codex/commit/73098939a3cc4b9a25cb03b615257c09698496a4))
+
 ## [1.4.0](https://github.com/GadDev/ai-codex/compare/v1.3.0...v1.4.0) (2026-04-16)
 
 ### Features

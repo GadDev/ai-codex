@@ -1,3 +1,12 @@
+## [1.4.0](https://github.com/GadDev/ai-codex/compare/v1.3.0...v1.4.0) (2026-04-16)
+
+### Features
+
+* add comprehensive explainer on the agentic ai revolution for beginners ([a55e307](https://github.com/GadDev/ai-codex/commit/a55e307c409ff2e882cabd09d09b86bb028c560f))
+* enhance ingestion cli with combined url support and note length control ([349f4a4](https://github.com/GadDev/ai-codex/commit/349f4a445f1f5cefb2174c667532abb2ddd8a1ea))
+* enhance summarize function with multi-source url  support and note length options ([0f7976e](https://github.com/GadDev/ai-codex/commit/0f7976ef11350485e6ae298900bb3173d21b5b62))
+* update package version to 1.3.0 and integrate @vercel/analytics for enhanced tracking ([a7b557d](https://github.com/GadDev/ai-codex/commit/a7b557d7de8b8582b48341c6f8027052eb8fc01f))
+
 ## [1.3.0](https://github.com/GadDev/ai-codex/compare/v1.2.0...v1.3.0) (2026-04-15)
 
 ### Features

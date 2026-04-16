@@ -4,7 +4,7 @@
    ═══════════════════════════════════════════ */
 
 import "highlight.js/styles/github-dark.min.css";
-
+import { inject } from "@vercel/analytics";
 import { initData, NOTES } from "./data.js";
 import { showNote } from "./navigation.js";
 import { renderNav, renderWelcomeGrid } from "./render.js";
@@ -39,7 +39,7 @@ async function init() {
 			?.classList.add("mobile-hidden");
 	}
 }
-
+inject();
 document.addEventListener("DOMContentLoaded", () => {
 	init().catch((err) => console.error("App init failed:", err));
 });

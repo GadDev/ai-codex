@@ -150,18 +150,24 @@ All notes are cached after first access. Subsequent loads work fully offline.
 
 ## Agent Ingestion
 
-A secure, agent-based CLI pipeline that fetches a webpage or generates content from a topic, summarises it with Claude, and writes a validated Markdown draft to `notes/drafts/` for human review.
+A secure, agent-based CLI pipeline that fetches one or more webpages (or generates content from a topic), summarises them with Claude, and writes validated Markdown drafts to `notes/drafts/` for human review. Supports combining multiple sources into a single note, controlling note length, and graceful cancellation with Ctrl+C.
 
 ### How It Works
 
 ```
---url / --topic
+--url="url" / --urls="a,b,c" / --topic
       ↓
   fetch.ts       ← HTTPS-only, 10s timeout, 2 retries
       ↓
   sanitize.ts    ← strips scripts/iframes, extracts readable text
+      |
+  ┌───┴──────────────────────────────────────────────┐
+  │ --combine: concatenate all sources, one API call │
+  │ default:   one API call per URL                  │
+  └───┬──────────────────────────────────────────────┘
       ↓
   summarize.ts   ← Claude API call with prompt-injection safeguards
+                   (--role lens applied, --length constraints injected)
       ↓
   format.ts      ← renders YAML frontmatter + structured Markdown note
       ↓
@@ -175,31 +181,49 @@ A secure, agent-based CLI pipeline that fetches a webpage or generates content f
 ### Usage
 
 ```bash
-# From a URL
+# Single URL
 npm run ingest -- --url="https://example.com/article"
 
-# Multiple URLs (comma-separated or repeated flag)
-npm run ingest -- --url="https://a.com,https://b.com"
+# Multiple URLs — repeated flag, produces one draft per URL
 npm run ingest -- --url="https://a.com" --url="https://b.com"
+
+# Multiple URLs — comma-separated, combine into one draft
+npm run ingest -- --urls="https://a.com,https://b.com" --combine
+
+# Repeated flags also work with --combine
+npm run ingest -- --url="https://a.com" --url="https://b.com" --combine
 
 # From a topic (no URL fetch — LLM generates from the topic alone)
 npm run ingest -- --topic="Model Context Protocol"
 
+# Control note length
+npm run ingest -- --url="https://example.com" --length=short
+npm run ingest -- --url="https://example.com" --length=medium
+npm run ingest -- --url="https://example.com" --length=long
+
 # With a specific analysis lens
 npm run ingest -- --url="https://example.com" --role=security
 
+# Combine flags
+npm run ingest -- --urls="https://a.com,https://b.com" --combine --length=long --role=research
+
 # Enable debug output
 npm run ingest -- --url="https://example.com" --debug
+
+# Cancel at any time with Ctrl+C — aborts the in-flight Claude request cleanly
 ```
 
 ### CLI Flags
 
-| Flag             | Description                                                           |
-| ---------------- | --------------------------------------------------------------------- |
-| `--url=<url>`    | URL(s) to ingest (max 3 per run; `https:` only)                       |
-| `--topic=<text>` | Generate a note directly from a topic description                     |
-| `--role=<role>`  | Analysis lens: `llm` (default), `security`, `engineering`, `research` |
-| `--debug`        | Echo log entries to stdout/stderr                                     |
+| Flag              | Description                                                                              |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| `--url=<url>`     | Single URL to ingest. Repeatable: `--url=a --url=b` produces one draft per URL.          |
+| `--urls=<urls>`   | Comma-separated URLs (e.g. `--urls="a.com,b.com"`). Use with `--combine`. Max 3 total.   |
+| `--topic=<text>`  | Generate a note directly from a topic description (no URL fetch)                         |
+| `--combine`       | Merge all URL sources into one unified draft instead of one draft per URL                |
+| `--length=<size>` | Note length: `short` (~3 min read), `medium` (default, ~5–8 min), `long` (~12–20 min)    |
+| `--role=<role>`   | Analysis lens: `llm` (default), `security`, `frontend`, `backend`, `research`, `product` |
+| `--debug`         | Echo log entries to stdout/stderr                                                        |
 
 ### Setup
 

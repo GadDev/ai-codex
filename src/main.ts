@@ -21,6 +21,8 @@ import { configureParsers } from "./utils.js";
 async function init() {
 	await initData();
 
+	const versionEl = document.querySelector<HTMLElement>(".logo-version");
+	if (versionEl) versionEl.textContent = `v${__APP_VERSION__}`;
 	configureParsers();
 	initSearch();
 	renderNav(getFilteredNotes(NOTES), showNote);

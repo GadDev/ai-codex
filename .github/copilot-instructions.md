@@ -71,6 +71,7 @@ All guidance derives from [notes/30-ai-app-security-checklist.md](../notes/30-ai
 
 - **No secrets in source code.** All API keys and credentials must come from `process.env`. Never hardcode, log, or interpolate them into strings for user display.
 - **`.env` is never committed.** It is already listed in `.gitignore`. Do not add exceptions.
+- **Never read `.env` files.** Do not open, read, summarise, or reference the contents of any `.env`, `.env.local`, `.env.*.local`, or similarly named secrets file. Do not suggest edits to these files that would expose their values. If a task requires an API key, refer to the environment variable name only (e.g. `OPENAI_API_KEY`) — never its value.
 - **Validate all external inputs at the boundary.** Treat anything arriving from outside the process (URLs, file content, API responses, CLI arguments) as untrusted.
 - **No dynamic code execution.** Do not use `eval`, `Function()`, or dynamic `import()` on user-supplied strings.
 

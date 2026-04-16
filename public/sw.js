@@ -3,13 +3,15 @@
    Cache strategy:
      Core assets  -> cache-first  (pre-cached on install)
      Note .md     -> stale-while-revalidate (cache-on-access)
+     Audio files  -> cache-first, network fallback (NOT pre-cached)
      Everything else -> cache-first, network fallback
    ═══════════════════════════════════════════ */
 
 // AUTO-PATCHED by scripts/build-manifest.ts -- do not edit this line manually.
-const CACHE_VERSION = "sha256-2d2570dadedc";
+const CACHE_VERSION = "sha256-ad5a68cddebe";
 const CORE_CACHE = `claude-notebook-core-${CACHE_VERSION}`;
 const NOTES_CACHE = `claude-notebook-notes-${CACHE_VERSION}`;
+const AUDIO_CACHE = `claude-notebook-audio-${CACHE_VERSION}`;
 
 // Only stable, unhashed paths are pre-cached.
 // Vite-hashed JS/CSS are NOT listed here -- they are cached on first access
@@ -18,6 +20,7 @@ const CORE_ASSETS = [
 	"./", // index.html (navigation requests)
 	"./notes-manifest.json", // needed immediately for search + offline
 	"./manifest.json", // PWA manifest
+	"./audio/manifest.json", // audio availability index (~2 kB)
 	"./icons/icon-192.svg",
 	"./icons/icon-512.svg",
 ];
@@ -39,7 +42,12 @@ self.addEventListener("activate", (event) => {
 			.then((keys) =>
 				Promise.all(
 					keys
-						.filter((key) => key !== CORE_CACHE && key !== NOTES_CACHE)
+						.filter(
+							(key) =>
+								key !== CORE_CACHE &&
+								key !== NOTES_CACHE &&
+								key !== AUDIO_CACHE,
+						)
 						.map((key) => caches.delete(key)),
 				),
 			),
@@ -78,8 +86,24 @@ self.addEventListener("fetch", (event) => {
 		return;
 	}
 
-	// 2. Core + hashed assets — cache-first, fallback to network
-	event.respondWith(
-		caches.match(request).then((cached) => cached ?? fetch(request)),
-	);
+	// 3. Audio files — cache-first, network fallback, offline 503
+	//    Never pre-cached (39 × ~3 MB = ~117 MB would be too large).
+	//    Cached on first access; served from cache thereafter.
+	if (url.pathname.startsWith("/audio/")) {
+		event.respondWith(
+			caches.open(AUDIO_CACHE).then(async (cache) => {
+				const cached = await cache.match(request);
+				if (cached) return cached;
+				try {
+					const fresh = await fetch(request);
+					if (fresh.ok) cache.put(request, fresh.clone());
+					return fresh;
+				} catch {
+					// Network unavailable and not cached — return a plain 503
+					return new Response("Audio unavailable offline", { status: 503 });
+				}
+			}),
+		);
+		return;
+	}
 });

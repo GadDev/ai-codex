@@ -2,12 +2,24 @@
    tts-ui.ts — Floating "Read Aloud" player UI
    ═══════════════════════════════════════════ */
 
+import { AudioPlayer } from "./audio-player.js";
 import { extractSpeechContent, TTSController } from "./tts.js";
-import type { SpeechSegment, TTSState } from "./types.js";
+import type {
+	IPlaybackEngine,
+	NoteSearchEntry,
+	SpeechSegment,
+	TTSState,
+} from "./types.js";
+
+function requireEl<T extends Element>(parent: ParentNode, selector: string): T {
+	const el = parent.querySelector<T>(selector);
+	if (!el) throw new Error(`Required element not found: ${selector}`);
+	return el;
+}
 
 class TTSPlayer {
 	// ── Field declarations (required by TypeScript strict mode) ──
-	private _controller: TTSController;
+	private _controller: IPlaybackEngine;
 	private _panel!: HTMLDivElement; // definite assignment: set by _buildPanel() in constructor
 	private _currentHighlightEl: Element | null;
 
@@ -17,7 +29,19 @@ class TTSPlayer {
 		this._buildPanel();
 		this._wireVoices();
 		this._wireKeyboard();
+		this._wireEngineCallbacks();
+	}
 
+	// ── Engine factory ────────────────────────────────────────────────────────
+
+	private _createEngine(note: NoteSearchEntry): IPlaybackEngine {
+		if (note.hasAudio) {
+			return new AudioPlayer(note.slug);
+		}
+		return new TTSController();
+	}
+
+	private _wireEngineCallbacks(): void {
 		this._controller
 			.onBoundary((_idx: number, seg: SpeechSegment) => this._onBoundary(seg))
 			.onEnd(() => this._onEnd())
@@ -35,6 +59,9 @@ class TTSPlayer {
 
 		// All content is static markup — no user data interpolated here
 		panel.innerHTML = `
+      <div id="tts-stale-warning" style="display:none" role="alert" aria-live="polite">
+        Audio may be outdated — refresh audio file for this note to ensure it matches the current text.
+      </div>
       <div class="tts-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Reading progress">
         <div class="tts-progress-fill" id="tts-progress-fill"></div>
       </div>
@@ -49,6 +76,7 @@ class TTSPlayer {
           <button class="tts-btn" id="tts-stop"    aria-label="Stop"                    title="Stop" disabled>■</button>
         </div>
         <select class="tts-select" id="tts-voice" aria-label="Voice"></select>
+        <span class="tts-voice-label" id="tts-voice-label" style="display:none">Voice: OpenAI</span>
         <div class="tts-rate">
           <span class="tts-rate-label" id="tts-rate-label" aria-live="polite">1×</span>
           <input
@@ -66,39 +94,45 @@ class TTSPlayer {
       </div>
     `;
 
-		panel
-			.querySelector<HTMLButtonElement>("#tts-restart")!
-			.addEventListener("click", () => {
+		requireEl<HTMLButtonElement>(panel, "#tts-restart").addEventListener(
+			"click",
+			() => {
 				this._controller.seekToSegment(0);
-			});
-		panel
-			.querySelector<HTMLButtonElement>("#tts-back")!
-			.addEventListener("click", () => {
+			},
+		);
+		requireEl<HTMLButtonElement>(panel, "#tts-back").addEventListener(
+			"click",
+			() => {
 				this._controller.skipBack();
-			});
-		panel
-			.querySelector<HTMLButtonElement>("#tts-play")!
-			.addEventListener("click", () => {
+			},
+		);
+		requireEl<HTMLButtonElement>(panel, "#tts-play").addEventListener(
+			"click",
+			() => {
 				this._togglePlay();
-			});
-		panel
-			.querySelector<HTMLButtonElement>("#tts-forward")!
-			.addEventListener("click", () => {
+			},
+		);
+		requireEl<HTMLButtonElement>(panel, "#tts-forward").addEventListener(
+			"click",
+			() => {
 				this._controller.skipForward();
-			});
-		panel
-			.querySelector<HTMLButtonElement>("#tts-stop")!
-			.addEventListener("click", () => {
+			},
+		);
+		requireEl<HTMLButtonElement>(panel, "#tts-stop").addEventListener(
+			"click",
+			() => {
 				this.stop();
-			});
-		panel
-			.querySelector<HTMLButtonElement>("#tts-close")!
-			.addEventListener("click", () => {
+			},
+		);
+		requireEl<HTMLButtonElement>(panel, "#tts-close").addEventListener(
+			"click",
+			() => {
 				this.detach();
-			});
+			},
+		);
 
-		const rateInput = panel.querySelector<HTMLInputElement>("#tts-rate")!;
-		const rateLabel = panel.querySelector<HTMLElement>("#tts-rate-label")!;
+		const rateInput = requireEl<HTMLInputElement>(panel, "#tts-rate");
+		const rateLabel = requireEl<HTMLElement>(panel, "#tts-rate-label");
 
 		const savedRate = parseFloat(localStorage.getItem("tts-rate") ?? "1");
 		rateInput.value = String(savedRate);
@@ -117,7 +151,7 @@ class TTSPlayer {
 		});
 
 		// Progress bar — click or drag to seek
-		const progressBar = panel.querySelector<HTMLElement>(".tts-progress-bar")!;
+		const progressBar = requireEl<HTMLElement>(panel, ".tts-progress-bar");
 		let _dragging = false;
 		let _wasPlayingBeforeDrag = false;
 
@@ -129,7 +163,7 @@ class TTSPlayer {
 			);
 			// During drag: only update the visual fill, don't restart speech yet
 			const pct = Math.round(fraction * 100);
-			panel.querySelector<HTMLElement>("#tts-progress-fill")!.style.width =
+			requireEl<HTMLElement>(panel, "#tts-progress-fill").style.width =
 				pct + "%";
 			progressBar.setAttribute("aria-valuenow", String(pct));
 			return fraction;
@@ -181,8 +215,7 @@ class TTSPlayer {
 		const ALLOWED = ["Samantha", "Daniel"];
 
 		const populate = (): void => {
-			const select =
-				this._panel.querySelector<HTMLSelectElement>("#tts-voice")!;
+			const select = requireEl<HTMLSelectElement>(this._panel, "#tts-voice");
 			const voices = window.speechSynthesis.getVoices();
 			if (!voices.length) return;
 
@@ -211,10 +244,15 @@ class TTSPlayer {
 			const preferred = allowed.find((v) => v.name === preferredName);
 			if (preferred) {
 				select.value = preferred.name;
-				this._controller.setVoice(preferred);
+				if (this._controller instanceof TTSController)
+					this._controller.setVoice(preferred);
 			} else if (allowed.length) {
-				select.value = allowed[0].name;
-				this._controller.setVoice(allowed[0]);
+				const first = allowed[0];
+				if (first) {
+					select.value = first.name;
+					if (this._controller instanceof TTSController)
+						this._controller.setVoice(first);
+				}
 			}
 		};
 
@@ -222,9 +260,10 @@ class TTSPlayer {
 		populate();
 		window.speechSynthesis.addEventListener("voiceschanged", populate);
 
-		this._panel
-			.querySelector<HTMLSelectElement>("#tts-voice")!
-			.addEventListener("change", (e) => {
+		requireEl<HTMLSelectElement>(this._panel, "#tts-voice").addEventListener(
+			"change",
+			(e) => {
+				if (!(this._controller instanceof TTSController)) return;
 				const voices = window.speechSynthesis.getVoices();
 				const voice = voices.find(
 					(v) => v.name === (e.target as HTMLSelectElement).value,
@@ -233,6 +272,40 @@ class TTSPlayer {
 					this._controller.setVoice(voice);
 					localStorage.setItem("tts-voice", voice.name);
 				}
+			},
+		);
+	}
+
+	// ── Voice selector + label visibility ───────────────────────────────────────
+
+	private _setVoiceSelectorVisible(visible: boolean): void {
+		const select = this._panel.querySelector<HTMLSelectElement>("#tts-voice");
+		const label = this._panel.querySelector<HTMLElement>("#tts-voice-label");
+		if (select) select.style.display = visible ? "" : "none";
+		if (label) label.style.display = visible ? "none" : "";
+	}
+
+	// ── Stale audio warning ───────────────────────────────────────────────────
+
+	private _setStaleWarning(visible: boolean): void {
+		const el = this._panel.querySelector<HTMLElement>("#tts-stale-warning");
+		if (el) el.style.display = visible ? "" : "none";
+	}
+
+	private _checkStaleAudio(note: NoteSearchEntry, fullText: string): void {
+		if (!note.hasAudio || !note.audioHash) return;
+		const expected = note.audioHash;
+		const encoded = new TextEncoder().encode(fullText);
+		crypto.subtle
+			.digest("SHA-256", encoded)
+			.then((buf) => {
+				const hex = Array.from(new Uint8Array(buf))
+					.map((b) => b.toString(16).padStart(2, "0"))
+					.join("");
+				this._setStaleWarning(hex !== expected);
+			})
+			.catch(() => {
+				// crypto.subtle unavailable (non-secure context) — skip warning silently
 			});
 	}
 
@@ -259,12 +332,41 @@ class TTSPlayer {
 
 	/**
 	 * Attach the player to a newly rendered note content element.
-	 * Stops any in-progress speech and shows the panel.
+	 * Selects AudioPlayer when pre-generated audio is available,
+	 * otherwise falls back to the Web Speech API (TTSController).
 	 */
-	attach(contentEl: Element): void {
+	attach(contentEl: Element, note: NoteSearchEntry): void {
 		this.stop();
+		this._controller = this._createEngine(note);
+		this._wireEngineCallbacks();
+
+		// Restore saved playback rate on the new engine
+		const savedRate = parseFloat(localStorage.getItem("tts-rate") ?? "1");
+		this._controller.setRate(savedRate);
+
+		// Apply saved voice when using Web Speech API
+		if (this._controller instanceof TTSController) {
+			const savedVoice = localStorage.getItem("tts-voice");
+			if (savedVoice) {
+				const voice = window.speechSynthesis
+					.getVoices()
+					.find((v) => v.name === savedVoice);
+				if (voice) this._controller.setVoice(voice);
+			}
+		}
+
+		// Show voice selector only for Web Speech API; show static label for AudioPlayer
+		this._setVoiceSelectorVisible(this._controller instanceof TTSController);
+
+		// Reset stale warning — recomputed below
+		this._setStaleWarning(false);
+
 		const { fullText, segments } = extractSpeechContent(contentEl);
 		this._controller.load(fullText, segments);
+
+		// Check for stale audio after text is extracted (non-blocking)
+		this._checkStaleAudio(note, fullText);
+
 		this._updateProgress(0);
 		this._panel.style.display = "";
 	}
@@ -324,14 +426,15 @@ class TTSPlayer {
 	}
 
 	private _updateControls(state: TTSState): void {
-		const playBtn = this._panel.querySelector<HTMLButtonElement>("#tts-play")!;
-		const stopBtn = this._panel.querySelector<HTMLButtonElement>("#tts-stop")!;
-		const restartBtn =
-			this._panel.querySelector<HTMLButtonElement>("#tts-restart")!;
-		const backBtn = this._panel.querySelector<HTMLButtonElement>("#tts-back")!;
-		const fwdBtn =
-			this._panel.querySelector<HTMLButtonElement>("#tts-forward")!;
-		const icon = playBtn.querySelector<HTMLElement>(".tts-play-icon")!;
+		const playBtn = requireEl<HTMLButtonElement>(this._panel, "#tts-play");
+		const stopBtn = requireEl<HTMLButtonElement>(this._panel, "#tts-stop");
+		const restartBtn = requireEl<HTMLButtonElement>(
+			this._panel,
+			"#tts-restart",
+		);
+		const backBtn = requireEl<HTMLButtonElement>(this._panel, "#tts-back");
+		const fwdBtn = requireEl<HTMLButtonElement>(this._panel, "#tts-forward");
+		const icon = requireEl<HTMLElement>(playBtn, ".tts-play-icon");
 
 		const active = state === "playing" || state === "paused";
 

@@ -6,7 +6,7 @@
 import DOMPurify from "dompurify";
 import hljs from "highlight.js";
 import { marked } from "marked";
-import { NOTES } from "./data.js";
+import { NOTES, SEARCH_ENTRIES } from "./data.js";
 import {
 	renderNav,
 	renderRelatedNotes,
@@ -18,6 +18,12 @@ import {
 import { getFilteredNotes, getState, setState } from "./state.js";
 import { ttsPlayer } from "./tts-ui.js";
 import { parseFrontMatter, readingTime, slugify } from "./utils.js";
+
+function requireEl<T extends Element>(parent: ParentNode, selector: string): T {
+	const el = parent.querySelector<T>(selector);
+	if (!el) throw new Error(`Required element not found: ${selector}`);
+	return el;
+}
 
 // ── Collapsible sections ──
 
@@ -69,7 +75,7 @@ export function setupSectionHighlighting(): void {
 		sectionObserver.disconnect();
 	}
 
-	const contentEl = document.getElementById("note-content")!;
+	const contentEl = requireEl<HTMLElement>(document, "#note-content");
 	const headings = Array.from(
 		contentEl.querySelectorAll<HTMLElement>("h2, h3"),
 	);
@@ -85,7 +91,7 @@ export function setupSectionHighlighting(): void {
 	const { activeNoteId } = getState();
 	renderSectionNav(headings, activeNoteId);
 
-	const scrollRoot = document.getElementById("main-content")!;
+	const scrollRoot = requireEl<HTMLElement>(document, "#main-content");
 
 	function getActiveHeading(): HTMLElement | undefined {
 		const offset = scrollRoot.scrollTop + scrollRoot.clientHeight * 0.25;
@@ -173,7 +179,7 @@ export async function fetchNote(slug: string): Promise<string> {
  * Render a note into the main content area and update all related UI.
  */
 export async function showNote(noteId: string): Promise<void> {
-	const note = NOTES.find((n) => n.id === noteId);
+	const note = SEARCH_ENTRIES.find((n) => n.id === noteId);
 	if (!note) return;
 
 	// ── History tracking ──
@@ -193,12 +199,12 @@ export async function showNote(noteId: string): Promise<void> {
 	syncNavActiveState(noteId);
 
 	// Switch screens
-	document.getElementById("welcome-screen")!.style.display = "none";
-	const noteView = document.getElementById("note-view")!;
+	requireEl<HTMLElement>(document, "#welcome-screen").style.display = "none";
+	const noteView = requireEl<HTMLElement>(document, "#note-view");
 	noteView.style.display = "flex";
 
 	// ── Show loading skeleton while fetching ──
-	const contentEl = document.getElementById("note-content")!;
+	const contentEl = requireEl<HTMLElement>(document, "#note-content");
 	contentEl.innerHTML =
 		'<div class="note-skeleton" aria-busy="true" aria-label="Loading note"><div class="skeleton-line skeleton-title"></div><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line skeleton-short"></div></div>';
 
@@ -222,7 +228,7 @@ export async function showNote(noteId: string): Promise<void> {
 	const canForward = newIndex < newHistory.length - 1;
 
 	// ── Topbar (built safely — user content via textContent only) ──
-	const topbar = document.getElementById("note-topbar")!;
+	const topbar = requireEl<HTMLElement>(document, "#note-topbar");
 	topbar.innerHTML = `
     <div class="topbar-nav">
       <button class="nav-hist-btn" id="nav-back" aria-label="Back (⌘[)" title="Back (⌘[)" ${canBack ? "" : "disabled"}>‹</button>
@@ -233,12 +239,12 @@ export async function showNote(noteId: string): Promise<void> {
     <span class="topbar-meta"></span>
     <div class="topbar-tags"></div>
   `;
-	topbar.querySelector<HTMLElement>(".topbar-emoji")!.textContent = note.emoji;
-	topbar.querySelector<HTMLElement>(".topbar-title")!.textContent = note.title;
-	topbar.querySelector<HTMLElement>(".topbar-meta")!.textContent =
+	requireEl<HTMLElement>(topbar, ".topbar-emoji").textContent = note.emoji;
+	requireEl<HTMLElement>(topbar, ".topbar-title").textContent = note.title;
+	requireEl<HTMLElement>(topbar, ".topbar-meta").textContent =
 		`${mins} min read${dateStr ? " · " + dateStr : ""}`;
 
-	const tagsContainer = topbar.querySelector<HTMLElement>(".topbar-tags")!;
+	const tagsContainer = requireEl<HTMLElement>(topbar, ".topbar-tags");
 	note.tags.forEach((t) => {
 		const span = document.createElement("span");
 		span.className = "tag";
@@ -246,10 +252,14 @@ export async function showNote(noteId: string): Promise<void> {
 		tagsContainer.appendChild(span);
 	});
 
-	document.getElementById("nav-back")!.addEventListener("click", navigateBack);
-	document
-		.getElementById("nav-forward")!
-		.addEventListener("click", navigateForward);
+	requireEl<HTMLButtonElement>(document, "#nav-back").addEventListener(
+		"click",
+		navigateBack,
+	);
+	requireEl<HTMLButtonElement>(document, "#nav-forward").addEventListener(
+		"click",
+		navigateForward,
+	);
 
 	// ── Render markdown content (contentEl already in DOM from skeleton above) ──
 	const mdBody = rawMd.replace(/^---[\s\S]*?---\n?/, "");
@@ -267,7 +277,7 @@ export async function showNote(noteId: string): Promise<void> {
 	renderRelatedNotes(note, contentEl, showNote);
 
 	// Scroll to top
-	document.getElementById("main-content")!.scrollTop = 0;
+	requireEl<HTMLElement>(document, "#main-content").scrollTop = 0;
 
 	// Section nav + scroll spy
 	setupSectionHighlighting();
@@ -276,7 +286,8 @@ export async function showNote(noteId: string): Promise<void> {
 	renderTOC();
 
 	// Read Aloud — attach TTS player to the freshly rendered content
-	ttsPlayer.attach(contentEl);
+	// AudioPlayer is used when pre-generated audio exists; TTSController otherwise
+	ttsPlayer.attach(contentEl, note);
 
 	// Close mobile sidebar
 	const sidebar = document.querySelector<HTMLElement>(".sidebar");

@@ -2,7 +2,7 @@
    tts.ts — Text-to-Speech engine (Web Speech API)
    ═══════════════════════════════════════════ */
 
-import type { SpeechSegment, TTSState } from "./types.js";
+import type { IPlaybackEngine, SpeechSegment, TTSState } from "./types.js";
 
 /**
  * Extract speakable text segments from a rendered note content element.
@@ -131,7 +131,7 @@ function findSegmentIndex(
 
 // ── TTSController ────────────────────────────────────────────────────────────
 
-export class TTSController {
+export class TTSController implements IPlaybackEngine {
 	// ── Field declarations (required by TypeScript strict mode) ──
 	private _synth: SpeechSynthesis;
 	private _utterance: SpeechSynthesisUtterance | null;

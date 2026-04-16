@@ -14,6 +14,10 @@ export interface NoteMetadata {
 /** NoteMetadata enriched with plain-text content for Fuse.js indexing. */
 export interface NoteSearchEntry extends NoteMetadata {
 	readonly content: string;
+	/** True when a pre-generated audio file is available for this note. */
+	readonly hasAudio?: boolean;
+	/** SHA-256 hash of the speech text at audio-generation time. */
+	readonly audioHash?: string;
 }
 
 /** Shape of public/notes-manifest.json generated at build time. */
@@ -58,4 +62,22 @@ export interface SpeechSegment {
 	el: Element;
 	charStart: number;
 	charEnd: number;
+}
+
+/** Shared contract for TTS playback engines (Web Speech API and AudioPlayer). */
+export interface IPlaybackEngine {
+	load(fullText: string, segments: SpeechSegment[]): void;
+	play(): void;
+	pause(): void;
+	stop(): void;
+	seekToFraction(fraction: number): void;
+	seekToSegment(idx: number): void;
+	skipBack(): void;
+	skipForward(): void;
+	setRate(rate: number): this;
+	onBoundary(fn: (idx: number, seg: SpeechSegment) => void): this;
+	onEnd(fn: () => void): this;
+	onStateChange(fn: (state: TTSState) => void): this;
+	onProgress(fn: (pct: number) => void): this;
+	readonly state: TTSState;
 }

@@ -22,5 +22,12 @@ coverage/
 npm-debug.log*
 logs/
 
+# Pre-generated TTS audio (regenerate locally with npm run generate:audio)
+public/audio/*.mp3
+public/audio/*.words.json
+
+# Spike / local scratch files
+tmp/
+
 # drafts
 drafts/

@@ -11,6 +11,7 @@
 import { createHash } from "node:crypto";
 import {
 	cpSync,
+	existsSync,
 	mkdirSync,
 	readdirSync,
 	readFileSync,
@@ -23,6 +24,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
 const NOTES_DIR = join(ROOT, "notes");
 const PUBLIC_DIR = join(ROOT, "public");
+const AUDIO_DIR = join(PUBLIC_DIR, "audio");
+const AUDIO_MANIFEST_PATH = join(AUDIO_DIR, "manifest.json");
 const OUT_FILE = join(PUBLIC_DIR, "notes-manifest.json");
 const SW_FILE = join(PUBLIC_DIR, "sw.js");
 
@@ -35,11 +38,29 @@ interface NoteSearchEntry {
 	title: string;
 	tags: string[];
 	content: string;
+	hasAudio: boolean;
+	audioHash?: string;
 }
 
 interface NotesManifest {
 	version: string;
 	notes: NoteSearchEntry[];
+}
+
+interface AudioManifestEntry {
+	readonly audioHash: string;
+}
+
+interface AudioManifest {
+	readonly notes: Record<string, AudioManifestEntry>;
+}
+
+/** Read public/audio/manifest.json if present; return empty record otherwise. */
+function readAudioManifest(): Record<string, AudioManifestEntry> {
+	if (!existsSync(AUDIO_MANIFEST_PATH)) return {};
+	return (
+		JSON.parse(readFileSync(AUDIO_MANIFEST_PATH, "utf-8")) as AudioManifest
+	).notes;
 }
 
 // ── Fallback emoji map ─────────────────────────────────────────────────────
@@ -193,8 +214,20 @@ function main(): void {
 		const emoji = fm.emoji || FALLBACK_EMOJI[num] || "📝";
 		const content = stripMarkdown(raw);
 
-		return { id, slug, emoji, title, tags, content };
+		return { id, slug, emoji, title, tags, content, hasAudio: false };
 	});
+
+	// ── Audio fields ────────────────────────────────────────────────────────
+	// Read hashes written by generate-audio.ts — no need to recompute.
+	const audioEntries = readAudioManifest();
+	for (const note of notes) {
+		const mp3Path = join(AUDIO_DIR, `${note.slug}.mp3`);
+		const entry = audioEntries[note.slug];
+		if (existsSync(mp3Path) && entry) {
+			note.hasAudio = true;
+			note.audioHash = entry.audioHash;
+		}
+	}
 
 	// Content hash for service worker cache busting
 	const hash = createHash("sha256")

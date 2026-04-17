@@ -1,3 +1,9 @@
+## [1.10.0](https://github.com/GadDev/ai-codex/compare/v1.9.0...v1.10.0) (2026-04-17)
+
+### Features
+
+* enhance stale warning ui with dismiss button and improved styling ([08e6fc6](https://github.com/GadDev/ai-codex/commit/08e6fc637f86ad60ef76fe359133d43e7de9df90))
+
 ## [1.9.0](https://github.com/GadDev/ai-codex/compare/v1.8.0...v1.9.0) (2026-04-17)
 
 ### Features

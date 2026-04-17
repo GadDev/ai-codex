@@ -1,3 +1,9 @@
+## [1.7.0](https://github.com/GadDev/ai-codex/compare/v1.6.0...v1.7.0) (2026-04-17)
+
+### Features
+
+* add build and audio generation flow diagram to readme file ([a8dff73](https://github.com/GadDev/ai-codex/commit/a8dff732dc3730bc424f99ef996baa9fde73793d))
+
 ## [1.6.0](https://github.com/GadDev/ai-codex/compare/v1.5.0...v1.6.0) (2026-04-17)
 
 ### Features

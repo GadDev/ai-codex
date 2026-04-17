@@ -52,27 +52,29 @@ describe("formatWords", () => {
 		}
 	});
 
-	it("throws for an entry where start >= end (equal)", () => {
-		expect(() =>
-			formatWords(makeResponse([{ word: "bad", start: 1.0, end: 1.0 }])),
-		).toThrow("start (1) >= end (1)");
+	it("skips entries where start >= end (equal)", () => {
+		const result = formatWords(
+			makeResponse([{ word: "bad", start: 1.0, end: 1.0 }]),
+		);
+		expect(result).toHaveLength(0);
 	});
 
-	it("throws for an entry where start > end", () => {
-		expect(() =>
-			formatWords(makeResponse([{ word: "bad", start: 2.5, end: 1.0 }])),
-		).toThrow("start (2.5) >= end (1)");
+	it("skips entries where start > end", () => {
+		const result = formatWords(
+			makeResponse([{ word: "bad", start: 2.5, end: 1.0 }]),
+		);
+		expect(result).toHaveLength(0);
 	});
 
-	it("only throws on the malformed entry, after valid entries were already processed", () => {
-		expect(() =>
-			formatWords(
-				makeResponse([
-					{ word: "good", start: 0.0, end: 0.5 },
-					{ word: "bad", start: 1.0, end: 0.8 },
-				]),
-			),
-		).toThrow('word "bad"');
+	it("skips malformed entries but processes valid ones", () => {
+		const result = formatWords(
+			makeResponse([
+				{ word: "good", start: 0.0, end: 0.5 },
+				{ word: "bad", start: 1.0, end: 0.8 },
+			]),
+		);
+		expect(result).toHaveLength(1);
+		expect(result[0]!.word).toBe("good");
 	});
 
 	it("trims whitespace from word tokens", () => {

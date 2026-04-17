@@ -21,6 +21,7 @@ const PUNCTUATION_ONLY = /^\p{P}+$/u;
  *
  * - Filters out empty strings and punctuation-only tokens.
  * - Skips entries where start >= end (Whisper occasionally emits point timestamps).
+ * - Logs a warning for skipped entries and continues processing.
  */
 export function formatWords(response: WhisperVerboseJson): WordTimestamp[] {
 	const raw = response.words ?? [];
@@ -33,10 +34,13 @@ export function formatWords(response: WhisperVerboseJson): WordTimestamp[] {
 		// Skip empty or punctuation-only tokens
 		if (word === "" || PUNCTUATION_ONLY.test(word)) continue;
 
+		// Skip entries with invalid timestamps (start >= end)
+		// This can happen with ElevenLabs Whisper integration for some words
 		if (entry.start >= entry.end) {
-			throw new Error(
-				`formatWords: invalid timestamp for word "${word}": start (${entry.start}) >= end (${entry.end})`,
+			console.warn(
+				`⚠ formatWords: skipping word "${word}" with invalid timestamp (start: ${entry.start}, end: ${entry.end})`,
 			);
+			continue;
 		}
 
 		result.push({ word, start: entry.start, end: entry.end });

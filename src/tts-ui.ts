@@ -104,7 +104,15 @@ class TTSPlayer {
 				<button class="tts-icon-btn tts-close-btn" id="tts-close" aria-label="Close player" title="Close (Esc)">✕</button>
 			</div>
 			<div id="tts-stale-warning" class="tts-stale-warning" style="display:none" role="alert" aria-live="polite">
-				⚠ Audio may be outdated — run <code>npm run generate:audio</code> to refresh
+				<div class="tts-stale-warning-content">
+					<span class="tts-stale-icon">ℹ️</span>
+					<div class="tts-stale-text">
+						<strong>Note updated</strong> — Audio may be outdated.
+						<br />
+						<code>npm run generate:audio</code> to refresh.
+					</div>
+					<button class="tts-stale-close" id="tts-stale-close" aria-label="Dismiss" title="Dismiss">✕</button>
+				</div>
 			</div>
 			<div class="tts-scrubber-wrap">
 				<div class="tts-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Reading progress">
@@ -354,6 +362,14 @@ class TTSPlayer {
 				}
 			},
 		);
+
+		// Stale warning dismiss button
+		requireEl<HTMLButtonElement>(
+			this._card,
+			"#tts-stale-close",
+		).addEventListener("click", () => {
+			this._setStaleWarning(false);
+		});
 	}
 
 	// ── Voice selector visibility ─────────────────────────────────────────────

@@ -310,6 +310,30 @@ noteContentCache.get(slug)?
 }
 ```
 
+### Build & Audio Generation Flow
+
+```mermaid
+graph TD
+    A["npm run build<br/>or npm run dev"] --> B["build-manifest.ts"]
+    A --> C["tsc --noEmit"]
+    A --> D["vite build"]
+    
+    B --> E["Read notes/*.md files"]
+    E --> F["Parse front matter + strip markdown"]
+    F --> G["Check public/audio/manifest.json<br/>for existing audio hashes"]
+    G --> H["Output: public/notes-manifest.json"]
+    
+    I["npm run generate:audio"] --> J["Requires: OPENAI_API_KEY env var"]
+    J --> K["Read public/notes-manifest.json"]
+    K --> L["For each note, generate:<br/>1. .mp3 via OpenAI TTS<br/>2. .words.json via Whisper"]
+    L --> M["Output to public/audio/"]
+    M --> N["Update public/audio/manifest.json<br/>with audio hashes"]
+    
+    D --> O["Output: dist/"]
+    H -.gitignored.- P["public/notes-manifest.json"]
+    M -.gitignored.- Q["public/audio/*.mp3<br/>public/audio/*.words.json"]
+```
+
 ### Toolchain
 
 | Tool                                             | Role                                            |

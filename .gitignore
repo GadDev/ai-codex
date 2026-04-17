@@ -24,6 +24,7 @@ logs/
 
 # Generated at build time (npm run build:manifest)
 public/notes-manifest.json
+public/notes/
 
 # Pre-generated TTS audio (regenerate locally with npm run generate:audio)
 public/audio/*.mp3

@@ -1,3 +1,9 @@
+## [1.12.0](https://github.com/GadDev/ai-codex/compare/v1.11.0...v1.12.0) (2026-04-17)
+
+### Features
+
+* enhance formatwords function to estimate duration for entries with invalid timestamps ([a2f91ed](https://github.com/GadDev/ai-codex/commit/a2f91edb983135e937a43e84cce48fd7af3196e9))
+
 ## [1.11.0](https://github.com/GadDev/ai-codex/compare/v1.10.0...v1.11.0) (2026-04-17)
 
 ### Features

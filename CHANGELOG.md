@@ -1,3 +1,9 @@
+## [1.8.0](https://github.com/GadDev/ai-codex/compare/v1.7.0...v1.8.0) (2026-04-17)
+
+### Features
+
+* update csp to enhance security and allow media sources ([742ee19](https://github.com/GadDev/ai-codex/commit/742ee19432d9da2ec9b0137f6995e914e23ce841))
+
 ## [1.7.0](https://github.com/GadDev/ai-codex/compare/v1.6.0...v1.7.0) (2026-04-17)
 
 ### Features

@@ -8,7 +8,7 @@
    ═══════════════════════════════════════════ */
 
 // AUTO-PATCHED by scripts/build-manifest.ts -- do not edit this line manually.
-const CACHE_VERSION = "sha256-ab814280e5df";
+const CACHE_VERSION = "sha256-37b08e5c887c";
 const CORE_CACHE = `claude-notebook-core-${CACHE_VERSION}`;
 const NOTES_CACHE = `claude-notebook-notes-${CACHE_VERSION}`;
 const AUDIO_CACHE = `claude-notebook-audio-${CACHE_VERSION}`;
@@ -16,11 +16,12 @@ const AUDIO_CACHE = `claude-notebook-audio-${CACHE_VERSION}`;
 // Only stable, unhashed paths are pre-cached.
 // Vite-hashed JS/CSS are NOT listed here -- they are cached on first access
 // by the general cache-first fallback below.
+// NOTE: audio/manifest.json is NOT pre-cached — it's fetched network-first
+// so new audio availability is detected immediately after generation.
 const CORE_ASSETS = [
 	"./", // index.html (navigation requests)
 	"./notes-manifest.json", // needed immediately for search + offline
 	"./manifest.json", // PWA manifest
-	"./audio/manifest.json", // audio availability index (~2 kB)
 	"./icons/icon-192.svg",
 	"./icons/icon-512.svg",
 ];
@@ -86,8 +87,37 @@ self.addEventListener("fetch", (event) => {
 		return;
 	}
 
-	// 3. Audio files — cache-first, network fallback, offline 503
-	//    Never pre-cached (39 × ~3 MB = ~117 MB would be too large).
+	// 3. Audio manifest — network-first, cache fallback
+	//    Must always fetch fresh so newly generated audio is immediately available.
+	//    Cached for offline use, but network is checked first.
+	if (url.pathname === "/audio/manifest.json") {
+		event.respondWith(
+			fetch(request)
+				.then((fresh) => {
+					if (fresh.ok) {
+						caches
+							.open(AUDIO_CACHE)
+							.then((cache) => cache.put(request, fresh.clone()));
+					}
+					return fresh;
+				})
+				.catch(async () => {
+					// Network unavailable — try cache
+					const cache = await caches.open(AUDIO_CACHE);
+					const cached = await cache.match(request);
+					if (cached) return cached;
+					// No network and no cache
+					return new Response(JSON.stringify({ notes: {} }), {
+						status: 200,
+						headers: { "Content-Type": "application/json" },
+					});
+				}),
+		);
+		return;
+	}
+
+	// 4. Audio files (mp3, words.json) — cache-first, network fallback, offline 503
+	//    Never pre-cached (41 × ~3 MB = ~123 MB would be too large).
 	//    Cached on first access; served from cache thereafter.
 	if (url.pathname.startsWith("/audio/")) {
 		event.respondWith(

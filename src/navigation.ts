@@ -238,6 +238,7 @@ export async function showNote(noteId: string): Promise<void> {
     <span class="topbar-title"></span>
     <span class="topbar-meta"></span>
     <div class="topbar-tags"></div>
+    ${note.hasAudio ? '<button class="topbar-listen-btn" id="topbar-listen" aria-label="Open audio player" title="Listen to this note"><span class="topbar-listen-eq" aria-hidden="true"><span></span><span></span><span></span></span>Listen</button>' : ""}
   `;
 	requireEl<HTMLElement>(topbar, ".topbar-emoji").textContent = note.emoji;
 	requireEl<HTMLElement>(topbar, ".topbar-title").textContent = note.title;
@@ -260,6 +261,16 @@ export async function showNote(noteId: string): Promise<void> {
 		"click",
 		navigateForward,
 	);
+
+	// Listen chip — opens/closes the player card
+	const listenBtn = document.getElementById(
+		"topbar-listen",
+	) as HTMLButtonElement | null;
+	if (listenBtn) {
+		listenBtn.addEventListener("click", () => {
+			ttsPlayer.toggle();
+		});
+	}
 
 	// ── Render markdown content (contentEl already in DOM from skeleton above) ──
 	const mdBody = rawMd.replace(/^---[\s\S]*?---\n?/, "");

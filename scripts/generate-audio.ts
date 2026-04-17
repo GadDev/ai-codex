@@ -15,7 +15,7 @@
 
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import chalk from "chalk";
 import ora from "ora";
@@ -25,6 +25,12 @@ import { generateMp3 } from "./audio/tts-openai.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
+
+// Auto-load .env from the project root if it exists
+const dotEnvPath = resolve(ROOT, ".env");
+if (existsSync(dotEnvPath)) {
+	process.loadEnvFile(dotEnvPath);
+}
 const NOTES_DIR = join(ROOT, "notes");
 const PUBLIC_DIR = join(ROOT, "public");
 const AUDIO_DIR = join(PUBLIC_DIR, "audio");

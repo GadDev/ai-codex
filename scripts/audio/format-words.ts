@@ -20,7 +20,7 @@ const PUNCTUATION_ONLY = /^\p{P}+$/u;
  * Normalise a Whisper verbose_json response into a flat array of word timestamps.
  *
  * - Filters out empty strings and punctuation-only tokens.
- * - Rejects entries where start >= end (malformed Whisper output) with a thrown Error.
+ * - Skips entries where start >= end (Whisper occasionally emits point timestamps).
  */
 export function formatWords(response: WhisperVerboseJson): WordTimestamp[] {
 	const raw = response.words ?? [];
@@ -35,7 +35,7 @@ export function formatWords(response: WhisperVerboseJson): WordTimestamp[] {
 
 		if (entry.start >= entry.end) {
 			throw new Error(
-				`Malformed Whisper timestamp for word "${word}": start (${entry.start}) >= end (${entry.end})`,
+				`formatWords: invalid timestamp for word "${word}": start (${entry.start}) >= end (${entry.end})`,
 			);
 		}
 

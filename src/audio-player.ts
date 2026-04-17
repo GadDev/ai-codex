@@ -137,11 +137,12 @@ export class AudioPlayer implements IPlaybackEngine {
 		this._words = [];
 		this._lastWordIdx = -1;
 
-		this._audio.src = `/audio/${this._slug}.mp3`;
+		const BASE = (import.meta.env.VITE_AUDIO_BASE_URL ?? "").replace(/\/$/, "");
+		this._audio.src = `${BASE}/audio/${this._slug}.mp3`;
 		this._audio.load();
 
 		// Fetch word timestamps eagerly — do not await, failure is non-fatal
-		fetch(`/audio/${this._slug}.words.json`)
+		fetch(`${BASE}/audio/${this._slug}.words.json`)
 			.then((r) => {
 				if (!r.ok) throw new Error(`HTTP ${r.status}`);
 				return r.json() as Promise<WordTimestamp[]>;
@@ -234,6 +235,16 @@ export class AudioPlayer implements IPlaybackEngine {
 
 		const next = h2Idxs.find((i) => i > current);
 		if (next !== undefined) this.seekToSegment(next);
+	}
+
+	/** The underlying HTMLAudioElement — exposed for Web Audio API wiring. */
+	get audioElement(): HTMLAudioElement {
+		return this._audio;
+	}
+
+	/** Total duration in seconds; 0 when not yet known. */
+	get audioDuration(): number {
+		return isFinite(this._audio.duration) ? this._audio.duration : 0;
 	}
 
 	/** Instant effect — no restart needed. */

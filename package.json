@@ -22,7 +22,8 @@
 		"prepare": "husky",
 		"ingest": "tsx scripts/agent/ingest.ts",
 		"generate:audio": "tsx scripts/generate-audio.ts",
-		"pregenerate:audio": "npm run build:manifest"
+		"pregenerate:audio": "npm run build:manifest",
+		"upload:audio": "tsx scripts/upload-audio.ts"
 	},
 	"keywords": [],
 	"author": "",

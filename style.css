@@ -1372,144 +1372,435 @@ body {
 }
 
 /* ══════════════════════════════════════════
-   READ ALOUD PLAYER  (#tts-player)
-   Fixed floating panel — bottom-right on
-   desktop, full-width pinned footer on mobile
+   READ ALOUD — Pill + Card player
    ══════════════════════════════════════════ */
 
-#tts-player {
+/* ── Pill (collapsed trigger) ── */
+.tts-pill {
 	position: fixed;
-	bottom: 24px;
-	right: 24px;
+	bottom: 28px;
+	right: 28px;
 	z-index: 200;
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	padding: 9px 16px 9px 12px;
+	border: 1px solid var(--border);
+	border-radius: 999px;
 	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
 	box-shadow:
-		0 4px 20px rgba(0, 0, 0, 0.12),
-		0 1px 4px rgba(0, 0, 0, 0.08);
-	padding: 0; /* progress bar spans full width, controls have own padding */
-	overflow: hidden; /* clip the progress fill to the panel corners */
-}
-
-.tts-controls {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	padding: 10px 14px;
-}
-
-/* Progress bar — click or drag to seek */
-.tts-progress-bar {
-	width: 100%;
-	height: 6px;
-	background: var(--border);
-	cursor: pointer;
-	transition: height 0.1s;
-	user-select: none;
-	touch-action: none; /* required for pointer capture on touch */
-}
-
-.tts-progress-bar:hover,
-.tts-progress-bar:active {
-	height: 10px;
-}
-
-.tts-progress-fill {
-	height: 100%;
-	width: 0%;
-	background: var(--accent);
-	transition: width 0.1s linear;
-	pointer-events: none;
-}
-
-.tts-progress-fill {
-	height: 100%;
-	width: 0%;
-	background: var(--accent);
-	transition: width 0.25s linear;
-}
-
-.tts-transport {
-	display: flex;
-	gap: 6px;
-	flex-shrink: 0;
-}
-
-.tts-btn {
-	width: 32px;
-	height: 32px;
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	background: var(--bg);
+		0 4px 16px rgba(0, 0, 0, 0.14),
+		0 1px 3px rgba(0, 0, 0, 0.08);
 	color: var(--text-primary);
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
 	font-size: 13px;
+	font-weight: 500;
+	cursor: pointer;
 	transition:
-		background 0.12s,
-		color 0.12s,
-		border-color 0.12s;
-	flex-shrink: 0;
+		background 0.15s,
+		border-color 0.15s,
+		box-shadow 0.15s,
+		transform 0.1s;
 }
 
-.tts-btn:hover:not(:disabled) {
+.tts-pill:hover {
+	border-color: var(--accent);
+	box-shadow:
+		0 6px 20px rgba(0, 0, 0, 0.18),
+		0 1px 3px rgba(0, 0, 0, 0.1);
+	transform: translateY(-1px);
+}
+
+.tts-pill-active {
 	background: var(--accent);
 	color: white;
 	border-color: var(--accent);
 }
 
-.tts-btn:disabled {
-	opacity: 0.35;
+.tts-pill-icon {
+	font-size: 15px;
+	line-height: 1;
+}
+
+.tts-pill-label {
+	line-height: 1;
+}
+
+/* Equaliser bars (animated when playing) */
+.tts-pill-eq {
+	display: flex;
+	align-items: flex-end;
+	gap: 2px;
+	height: 14px;
+	opacity: 0;
+	transition: opacity 0.2s;
+}
+
+.tts-pill-playing .tts-pill-eq {
+	opacity: 1;
+}
+
+.tts-pill-eq span {
+	display: block;
+	width: 3px;
+	border-radius: 2px;
+	background: currentColor;
+	transform-origin: bottom;
+}
+
+.tts-pill-playing .tts-pill-eq span:nth-child(1) {
+	animation: eq-bar 0.7s ease-in-out 0s infinite alternate;
+}
+.tts-pill-playing .tts-pill-eq span:nth-child(2) {
+	animation: eq-bar 0.7s ease-in-out 0.18s infinite alternate;
+}
+.tts-pill-playing .tts-pill-eq span:nth-child(3) {
+	animation: eq-bar 0.7s ease-in-out 0.35s infinite alternate;
+}
+
+@keyframes eq-bar {
+	from {
+		height: 4px;
+	}
+	to {
+		height: 14px;
+	}
+}
+
+/* Topbar listen chip */
+.topbar-listen-btn {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 11px 4px 9px;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background: transparent;
+	color: var(--text-secondary);
+	font-size: 12px;
+	font-weight: 500;
+	cursor: pointer;
+	margin-left: auto;
+	flex-shrink: 0;
+	transition:
+		color 0.15s,
+		border-color 0.15s,
+		background 0.15s;
+}
+
+.topbar-listen-btn:hover {
+	border-color: var(--accent);
+	color: var(--accent);
+}
+
+.topbar-listen-eq {
+	display: flex;
+	align-items: flex-end;
+	gap: 2px;
+	height: 12px;
+}
+
+.topbar-listen-eq span {
+	display: block;
+	width: 2.5px;
+	border-radius: 2px;
+	background: currentColor;
+}
+
+.topbar-listen-eq span:nth-child(1) {
+	height: 5px;
+}
+.topbar-listen-eq span:nth-child(2) {
+	height: 9px;
+}
+.topbar-listen-eq span:nth-child(3) {
+	height: 6px;
+}
+
+/* ── Card (expanded player) ── */
+#tts-player {
+	position: fixed;
+	bottom: 28px;
+	right: 28px;
+	z-index: 199;
+	width: 340px;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 16px;
+	box-shadow:
+		0 12px 40px rgba(0, 0, 0, 0.18),
+		0 2px 8px rgba(0, 0, 0, 0.1);
+	overflow: hidden;
+	backdrop-filter: blur(12px);
+}
+
+/* Card open/close animations */
+.tts-card-open {
+	animation: tts-card-in 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.tts-card-closing {
+	animation: tts-card-out 0.18s ease-in forwards;
+}
+
+@keyframes tts-card-in {
+	from {
+		opacity: 0;
+		transform: translateY(12px) scale(0.97);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+@keyframes tts-card-out {
+	from {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: translateY(8px) scale(0.97);
+	}
+}
+
+/* Card header: emoji + note title + close */
+.tts-card-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 14px 14px 0;
+}
+
+.tts-note-emoji {
+	font-size: 18px;
+	flex-shrink: 0;
+}
+
+.tts-note-title {
+	flex: 1;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--text-primary);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Stale warning */
+.tts-stale-warning {
+	margin: 10px 14px 0;
+	padding: 7px 10px;
+	border-radius: 8px;
+	background: rgba(192, 120, 64, 0.12);
+	border: 1px solid rgba(192, 120, 64, 0.3);
+	color: var(--accent);
+	font-size: 11px;
+	line-height: 1.4;
+}
+
+.tts-stale-warning code {
+	font-family: ui-monospace, monospace;
+	font-size: 10px;
+}
+
+/* Scrubber */
+.tts-scrubber-wrap {
+	padding: 4px 14px 0;
+}
+
+.tts-progress-bar {
+	position: relative;
+	width: 100%;
+	height: 4px;
+	background: var(--border);
+	border-radius: 2px;
+	cursor: pointer;
+	transition: height 0.15s;
+	user-select: none;
+	touch-action: none;
+}
+
+.tts-progress-bar:hover,
+.tts-progress-bar:active {
+	height: 6px;
+	margin-top: -1px;
+	margin-bottom: -1px;
+}
+
+.tts-progress-fill {
+	height: 100%;
+	width: 0%;
+	background: var(--accent);
+	border-radius: 2px;
+	transition: width 0.1s linear;
+	pointer-events: none;
+}
+
+/* Draggable thumb */
+.tts-scrub-thumb {
+	position: absolute;
+	top: 50%;
+	left: 0%;
+	transform: translate(-50%, -50%);
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: var(--accent);
+	border: 2px solid var(--surface);
+	box-shadow: 0 0 0 1px var(--accent);
+	opacity: 0;
+	transition:
+		opacity 0.15s,
+		left 0.05s linear;
+	pointer-events: none;
+}
+
+.tts-progress-bar:hover .tts-scrub-thumb,
+.tts-progress-bar:active .tts-scrub-thumb {
+	opacity: 1;
+}
+
+/* Time row */
+.tts-time-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-top: 5px;
+	position: relative;
+}
+
+.tts-time-elapsed,
+.tts-time-remaining {
+	font-size: 10px;
+	color: var(--text-secondary);
+	font-variant-numeric: tabular-nums;
+}
+
+/* Drag tooltip: floats above thumb */
+.tts-time-tooltip {
+	position: absolute;
+	top: -26px;
+	transform: translateX(-50%);
+	background: var(--text-primary);
+	color: var(--bg);
+	font-size: 10px;
+	font-variant-numeric: tabular-nums;
+	padding: 3px 6px;
+	border-radius: 4px;
+	white-space: nowrap;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.1s;
+}
+
+.tts-time-tooltip.visible {
+	opacity: 1;
+}
+
+/* Controls row */
+.tts-controls {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 10px 14px;
+	gap: 8px;
+}
+
+/* Transport (play/pause/skip etc.) */
+.tts-transport {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.tts-icon-btn {
+	width: 34px;
+	height: 34px;
+	border: none;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--text-primary);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition:
+		background 0.12s,
+		color 0.12s,
+		transform 0.1s;
+	flex-shrink: 0;
+}
+
+.tts-icon-btn:hover:not(:disabled) {
+	background: var(--accent-light);
+	color: var(--accent);
+}
+
+.tts-icon-btn:active:not(:disabled) {
+	transform: scale(0.9);
+}
+
+.tts-icon-btn:disabled {
+	opacity: 0.3;
 	cursor: not-allowed;
 }
 
-.tts-close-btn {
-	margin-left: auto;
-	border-color: transparent;
-	background: transparent;
-	color: var(--text-secondary);
-	font-size: 15px;
+/* Play button — slightly larger */
+.tts-play-btn {
+	width: 42px;
+	height: 42px;
+	background: var(--accent);
+	color: white;
+	box-shadow: 0 2px 8px rgba(192, 120, 64, 0.35);
 }
 
-.tts-close-btn:hover {
-	background: var(--surface-hover, var(--border));
-	color: var(--text-primary);
-	border-color: transparent;
+.tts-play-btn:hover:not(:disabled) {
+	background: var(--accent);
+	color: white;
+	filter: brightness(1.1);
+	box-shadow: 0 3px 12px rgba(192, 120, 64, 0.45);
+}
+
+.tts-close-btn {
+	font-size: 13px;
+	color: var(--text-secondary);
+}
+
+/* Right side: voice + speed */
+.tts-right-controls {
+	display: flex;
+	align-items: center;
+	gap: 8px;
 }
 
 .tts-select {
-	flex: 1;
-	min-width: 120px;
-	max-width: 200px;
-	padding: 5px 8px;
+	padding: 4px 6px;
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	background: var(--bg);
 	color: var(--text-primary);
-	font-size: 12px;
+	font-size: 11px;
 	cursor: pointer;
+	max-width: 110px;
 }
 
 .tts-rate {
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	flex-shrink: 0;
+	gap: 4px;
 }
 
 .tts-rate-label {
 	font-size: 11px;
 	color: var(--text-secondary);
-	min-width: 30px;
+	min-width: 24px;
 	text-align: right;
 	font-variant-numeric: tabular-nums;
 }
 
 .tts-range {
-	width: 80px;
+	width: 64px;
 	accent-color: var(--accent);
 	cursor: pointer;
 }
@@ -1522,26 +1813,27 @@ body {
 	transition: background 0.15s;
 }
 
-/* ── Mobile: full-width pinned footer ── */
-@media (max-width: 768px) {
+/* ── Mobile ── */
+@media (max-width: 600px) {
+	.tts-pill {
+		bottom: 16px;
+		right: 16px;
+	}
+
 	#tts-player {
 		bottom: 0;
 		right: 0;
 		left: 0;
-		border-radius: var(--radius) var(--radius) 0 0;
-		padding: 8px 12px;
+		width: auto;
+		border-radius: 16px 16px 0 0;
 	}
 
 	.tts-select {
-		display: none; /* Save space on small screens */
-	}
-
-	.tts-rate {
-		display: none; /* Save space on small screens */
+		display: none;
 	}
 
 	.tts-range {
-		width: 60px;
+		width: 50px;
 	}
 }
 

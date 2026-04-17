@@ -22,6 +22,9 @@ coverage/
 npm-debug.log*
 logs/
 
+# Generated at build time (npm run build:manifest)
+public/notes-manifest.json
+
 # Pre-generated TTS audio (regenerate locally with npm run generate:audio)
 public/audio/*.mp3
 public/audio/*.words.json

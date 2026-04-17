@@ -52,29 +52,38 @@ describe("formatWords", () => {
 		}
 	});
 
-	it("skips entries where start >= end (equal)", () => {
+	it("estimates duration for entries where start >= end (equal)", () => {
 		const result = formatWords(
-			makeResponse([{ word: "bad", start: 1.0, end: 1.0 }]),
+			makeResponse([{ word: "hello", start: 1.0, end: 1.0 }]),
 		);
-		expect(result).toHaveLength(0);
+		expect(result).toHaveLength(1);
+		expect(result[0]!.word).toBe("hello");
+		expect(result[0]!.start).toBe(1.0);
+		expect(result[0]!.end).toBeGreaterThan(1.0); // end > start (estimated)
 	});
 
-	it("skips entries where start > end", () => {
+	it("estimates duration for entries where start > end", () => {
 		const result = formatWords(
-			makeResponse([{ word: "bad", start: 2.5, end: 1.0 }]),
+			makeResponse([{ word: "test", start: 2.5, end: 1.0 }]),
 		);
-		expect(result).toHaveLength(0);
+		expect(result).toHaveLength(1);
+		expect(result[0]!.word).toBe("test");
+		expect(result[0]!.start).toBe(2.5);
+		expect(result[0]!.end).toBeGreaterThan(2.5); // end > start (estimated)
 	});
 
-	it("skips malformed entries but processes valid ones", () => {
+	it("preserves valid entries and estimates malformed ones", () => {
 		const result = formatWords(
 			makeResponse([
 				{ word: "good", start: 0.0, end: 0.5 },
-				{ word: "bad", start: 1.0, end: 0.8 },
+				{ word: "estimated", start: 1.0, end: 1.0 },
 			]),
 		);
-		expect(result).toHaveLength(1);
+		expect(result).toHaveLength(2);
 		expect(result[0]!.word).toBe("good");
+		expect(result[0]!.end).toBe(0.5); // exact timing
+		expect(result[1]!.word).toBe("estimated");
+		expect(result[1]!.end).toBeGreaterThan(1.0); // estimated duration
 	});
 
 	it("trims whitespace from word tokens", () => {

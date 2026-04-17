@@ -6,7 +6,7 @@
 import DOMPurify from "dompurify";
 import hljs from "highlight.js";
 import { marked } from "marked";
-import { NOTES, SEARCH_ENTRIES } from "./data.js";
+import { hasAudio, NOTES, SEARCH_ENTRIES } from "./data.js";
 import {
 	renderNav,
 	renderRelatedNotes,
@@ -238,7 +238,7 @@ export async function showNote(noteId: string): Promise<void> {
     <span class="topbar-title"></span>
     <span class="topbar-meta"></span>
     <div class="topbar-tags"></div>
-    ${note.hasAudio ? '<button class="topbar-listen-btn" id="topbar-listen" aria-label="Open audio player" title="Listen to this note"><span class="topbar-listen-eq" aria-hidden="true"><span></span><span></span><span></span></span>Listen</button>' : ""}
+    ${hasAudio(note.slug) ? '<button class="topbar-listen-btn" id="topbar-listen" aria-label="Open audio player" title="Listen to this note"><span class="topbar-listen-eq" aria-hidden="true"><span></span><span></span><span></span></span>Listen</button>' : ""}
   `;
 	requireEl<HTMLElement>(topbar, ".topbar-emoji").textContent = note.emoji;
 	requireEl<HTMLElement>(topbar, ".topbar-title").textContent = note.title;

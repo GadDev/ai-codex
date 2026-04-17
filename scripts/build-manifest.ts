@@ -38,7 +38,6 @@ interface NoteSearchEntry {
 	title: string;
 	tags: string[];
 	content: string;
-	hasAudio: boolean;
 	audioHash?: string;
 }
 
@@ -214,17 +213,16 @@ function main(): void {
 		const emoji = fm.emoji || FALLBACK_EMOJI[num] || "📝";
 		const content = stripMarkdown(raw);
 
-		return { id, slug, emoji, title, tags, content, hasAudio: false };
+		return { id, slug, emoji, title, tags, content };
 	});
 
-	// ── Audio fields ────────────────────────────────────────────────────────
-	// Read hashes written by generate-audio.ts — no need to recompute.
+	// ── Audio hash reference ────────────────────────────────────────────────────────
+	// Include audioHash for staleness detection, but don't rely on it for existence.
+	// Audio availability is determined by checking public/audio/manifest.json at runtime.
 	const audioEntries = readAudioManifest();
 	for (const note of notes) {
-		const mp3Path = join(AUDIO_DIR, `${note.slug}.mp3`);
 		const entry = audioEntries[note.slug];
-		if (existsSync(mp3Path) && entry) {
-			note.hasAudio = true;
+		if (entry?.audioHash) {
 			note.audioHash = entry.audioHash;
 		}
 	}

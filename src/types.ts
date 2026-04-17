@@ -14,9 +14,7 @@ export interface NoteMetadata {
 /** NoteMetadata enriched with plain-text content for Fuse.js indexing. */
 export interface NoteSearchEntry extends NoteMetadata {
 	readonly content: string;
-	/** True when a pre-generated audio file is available for this note. */
-	readonly hasAudio?: boolean;
-	/** SHA-256 hash of the speech text at audio-generation time. */
+	/** SHA-256 hash of the speech text at audio-generation time. Used for staleness detection. */
 	readonly audioHash?: string;
 }
 

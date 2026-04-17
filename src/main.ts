@@ -5,7 +5,7 @@
 
 import "highlight.js/styles/github-dark.min.css";
 import { inject } from "@vercel/analytics";
-import { initData, NOTES } from "./data.js";
+import { initData, loadAudioManifest, NOTES } from "./data.js";
 import { showNote } from "./navigation.js";
 import { renderNav, renderWelcomeGrid } from "./render.js";
 import { initSearch } from "./search.js";
@@ -20,6 +20,7 @@ import { configureParsers } from "./utils.js";
 
 async function init() {
 	await initData();
+	await loadAudioManifest();
 
 	const versionEl = document.querySelector<HTMLElement>(".logo-version");
 	if (versionEl) versionEl.textContent = `v${__APP_VERSION__}`;

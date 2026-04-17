@@ -7,6 +7,7 @@
    ═══════════════════════════════════════════ */
 
 import { AudioPlayer } from "./audio-player.js";
+import { hasAudio } from "./data.js";
 import { extractSpeechText } from "./extract-speech-text.js";
 import { extractSpeechContent, TTSController } from "./tts.js";
 import type {
@@ -54,7 +55,9 @@ class TTSPlayer {
 	// ── Engine factory ────────────────────────────────────────────────────────
 
 	private _createEngine(note: NoteSearchEntry): IPlaybackEngine {
-		return note.hasAudio ? new AudioPlayer(note.slug) : new TTSController();
+		return hasAudio(note.slug)
+			? new AudioPlayer(note.slug)
+			: new TTSController();
 	}
 
 	private _wireEngineCallbacks(): void {
@@ -368,7 +371,7 @@ class TTSPlayer {
 	}
 
 	private _checkStaleAudio(note: NoteSearchEntry): void {
-		if (!note.hasAudio || !note.audioHash) return;
+		if (!hasAudio(note.slug) || !note.audioHash) return;
 		const expected = note.audioHash;
 		fetch(`/notes/${note.slug}.md`)
 			.then((res) => {

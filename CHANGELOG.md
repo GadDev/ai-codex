@@ -1,3 +1,14 @@
+## [1.6.0](https://github.com/GadDev/ai-codex/compare/v1.5.0...v1.6.0) (2026-04-17)
+
+### Features
+
+* add audio generation scripts to package.json ([d1a6a99](https://github.com/GadDev/ai-codex/commit/d1a6a99edcf0ad0ad57676e86ec4439a1672c9db))
+* enhance build manifest to include audio file support and metadata ([dba5df0](https://github.com/GadDev/ai-codex/commit/dba5df05cc4df5247a5ea4aec726caf1d60d2d1e))
+* enhance service worker to support audio file caching with network fallback ([c7ae7a3](https://github.com/GadDev/ai-codex/commit/c7ae7a3f543b8a88f7e0f2b202664a49a3f7b375))
+* enhance tts functionality and improve navigation ([471b254](https://github.com/GadDev/ai-codex/commit/471b254c143881902fc02366eec58bc794f3d223))
+* read aloud player: introduce pill and card ui, enhance styles ([570f1f2](https://github.com/GadDev/ai-codex/commit/570f1f2d7ce369243cae2e74bb4fd8ae00e5aa73))
+* update .gitignore to include pre-generated tts audio files and temporary scratch files ([eb75a62](https://github.com/GadDev/ai-codex/commit/eb75a62e65c178d0443ff198db8b0ea5a87a4bfc))
+
 ## [1.5.0](https://github.com/GadDev/ai-codex/compare/v1.4.0...v1.5.0) (2026-04-16)
 
 ### Features

@@ -29,6 +29,24 @@
 		},
 		"10-screenshot-tools": {
 			"audioHash": "f7d93e2dd2fa2c0b18c86ef475171ee14d67682c261a42a0865c5e273b44c050"
+		},
+		"13-claude-models-guide": {
+			"audioHash": "d63e234a3f14c10a7eec8dd41581edd47867b79a0b7f2b6da3ff5aef233513fa"
+		},
+		"14-prompt-templates": {
+			"audioHash": "1a4dc28eccd6ad9b8bc3d10c2fd941963932b87b4eb531abaf53a1d2db656330"
+		},
+		"17-the-ai-landscape": {
+			"audioHash": "8f49df9217d7fd78718b00c0bc54ed93c6e0b4608094e74669308614b76fea43"
+		},
+		"19-embeddings-vector-search": {
+			"audioHash": "e5e82fc3129eaf21e82c6f0512ad1742ea6f94cc7fb4b5e7d96577ca7586fd1f"
+		},
+		"20-multimodal-ai": {
+			"audioHash": "edaf8dfa59b4b765cfbbb6528b8f109f5a21c641e6118408b468a7cd3565f7ce"
+		},
+		"21-building-rag-app": {
+			"audioHash": "02be9dc8f73ea8d6b3411a9beeb64a3935e6fa7b85d586442b416eb4e4410e0a"
 		}
 	}
 }

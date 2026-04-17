@@ -8,7 +8,7 @@
    ═══════════════════════════════════════════ */
 
 // AUTO-PATCHED by scripts/build-manifest.ts -- do not edit this line manually.
-const CACHE_VERSION = "sha256-5d9481effb77";
+const CACHE_VERSION = "sha256-529a85fdc698";
 const CORE_CACHE = `claude-notebook-core-${CACHE_VERSION}`;
 const NOTES_CACHE = `claude-notebook-notes-${CACHE_VERSION}`;
 const AUDIO_CACHE = `claude-notebook-audio-${CACHE_VERSION}`;

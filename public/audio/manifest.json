@@ -14,6 +14,21 @@
 		},
 		"05-claude-code-workflow": {
 			"audioHash": "c7af099535ff8d654907df9c22921aa9fa6243c1343e023ef8053bd24059cf34"
+		},
+		"06-custom-commands-and-mcp": {
+			"audioHash": "234dd20614e0b8bde8c69825b5c6c5b3ba4d5729c7031e781e5c5e6aa077ffea"
+		},
+		"07-hooks-and-sdk": {
+			"audioHash": "73f7758f53fcb24af5e5b47c8d148299301d355327be01a6f7758614ea4de666"
+		},
+		"08-commands-glossary": {
+			"audioHash": "03a38b6331caa363f407d3456da7d511792ee3d7098c01ac8a114acffaeffd0d"
+		},
+		"09-claude-with-playwright": {
+			"audioHash": "f9fb8dad3f9d635b8f916082a1f20af2d18f52670dd6e5a694c4587430da5732"
+		},
+		"10-screenshot-tools": {
+			"audioHash": "f7d93e2dd2fa2c0b18c86ef475171ee14d67682c261a42a0865c5e273b44c050"
 		}
 	}
 }

@@ -1,3 +1,10 @@
+## [1.11.0](https://github.com/GadDev/ai-codex/compare/v1.10.0...v1.11.0) (2026-04-17)
+
+### Features
+
+* enhance formatwords function to log warnings for skipped entries with invalid timestamps ([2527862](https://github.com/GadDev/ai-codex/commit/25278625bbe59af6ec9b3a42c9f2c8a62555270b))
+* update service worker cache version and enhance audio manifest handling ([a415aeb](https://github.com/GadDev/ai-codex/commit/a415aebde906ec20fb01245237a1a059eccc732c))
+
 ## [1.10.0](https://github.com/GadDev/ai-codex/compare/v1.9.0...v1.10.0) (2026-04-17)
 
 ### Features

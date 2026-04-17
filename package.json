@@ -1,6 +1,6 @@
 {
 	"name": "ai-codex",
-	"version": "1.10.0",
+	"version": "1.11.0",
 	"description": "AI Codex — a modern, offline-first PWA for exploring AI & Claude development notes.",
 	"type": "module",
 	"engines": {

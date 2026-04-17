@@ -1,3 +1,9 @@
+## [1.9.0](https://github.com/GadDev/ai-codex/compare/v1.8.0...v1.9.0) (2026-04-17)
+
+### Features
+
+* enhance audio management by implementing audio manifest and updating related functionalities ([95b0a93](https://github.com/GadDev/ai-codex/commit/95b0a93099f81fa5f5217ea62cc2186f8caa8d19))
+
 ## [1.8.0](https://github.com/GadDev/ai-codex/compare/v1.7.0...v1.8.0) (2026-04-17)
 
 ### Features

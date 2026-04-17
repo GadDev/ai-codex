@@ -47,6 +47,18 @@
 		},
 		"21-building-rag-app": {
 			"audioHash": "02be9dc8f73ea8d6b3411a9beeb64a3935e6fa7b85d586442b416eb4e4410e0a"
+		},
+		"23-constitutional-ai-rlhf": {
+			"audioHash": "2ab7e98428714a557e1f398a972df38f08347dfd9851cc51ec392e200f4cafbc"
+		},
+		"25-ai-evaluation-benchmarks": {
+			"audioHash": "edfd6deff90edeac7d7cf792d61c4e7e414ed53d4826febd59a31b753d0204b3"
+		},
+		"32-future-of-ai-development": {
+			"audioHash": "7487648dcb5224bc400d4c7bc4b03b57a657a5467c8c5e76d62c0580505c4f70"
+		},
+		"37-claude-api-cost-optimisation": {
+			"audioHash": "b679de4f2b61cc3906bf7c26bf4d4fae9e11036d94496575552e31badbca4ca9"
 		}
 	}
 }

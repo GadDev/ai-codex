@@ -1,3 +1,9 @@
+## [1.14.0](https://github.com/GadDev/ai-codex/compare/v1.13.0...v1.14.0) (2026-04-17)
+
+### Features
+
+* update audio manifest with new entries and fix service worker cache version ([d0ab4ff](https://github.com/GadDev/ai-codex/commit/d0ab4ff3b2444934e869540ddb210b945dd8361b))
+
 ## [1.13.0](https://github.com/GadDev/ai-codex/compare/v1.12.0...v1.13.0) (2026-04-17)
 
 ### Features
